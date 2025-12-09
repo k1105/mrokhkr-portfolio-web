@@ -1,0 +1,84 @@
+.headerBottomLeft {
+  position: fixed;
+  bottom: 5vh;
+  left: 3vw;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.hamburgerMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 40px;
+}
+
+.hamburgerLine {
+  width: 100%;
+  height: 1px;
+  background-color: var(--foreground);
+}
+
+.menuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.menuOverlay.closing {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.menuContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.menuItem {
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 1rem;
+  text-align: center;
+  transition: opacity 0.2s;
+}
+
+.menuItem:hover {
+  opacity: 0.7;
+}
+
+/* sp版（スマートフォン）のスタイル */
+@media (max-width: 768px) {
+  .headerBottomLeft {
+    bottom: 3vh;
+    left: 5vw;
+  }
+}

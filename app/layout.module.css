@@ -1,0 +1,36 @@
+.headerTopLeft {
+  position: fixed;
+  top: 5vh;
+  left: 3vw;
+  z-index: 1000;
+}
+
+.headerTopRight {
+  position: fixed;
+  top: 5vh;
+  right: 3vw;
+  z-index: 1000;
+}
+
+/* sp版（スマートフォン）のスタイル */
+@media (max-width: 768px) {
+  .headerTopLeft {
+    top: 3vh;
+    left: 5vw;
+  }
+
+  .headerTopLeft img {
+    width: 110px !important;
+    height: 25px !important;
+  }
+
+  .headerTopRight {
+    top: 3vh;
+    right: 5vw;
+  }
+
+  .headerTopRight img {
+    width: 25px !important;
+    height: 110px !important;
+  }
+}

@@ -1,3 +1,37 @@
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@keyframes circleReveal {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(100% at 50% 50%);
+  }
+}
+
+@keyframes rotateClockwise {
+  from {
+    transform: translate(-50%, -50%) rotate(var(--initial-rotation, 0deg));
+  }
+  to {
+    transform: translate(-50%, -50%)
+      rotate(calc(var(--initial-rotation, 0deg) + 360deg));
+  }
+}
+
+.circleMask {
+  animation: circleReveal 0.8s ease-in forwards,
+    rotateClockwise 30s linear infinite;
+  clip-path: circle(0% at 50% 50%);
+}
+
 .page {
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
@@ -68,10 +102,7 @@
   padding: 0 20px;
   border: none;
   border: 1px solid transparent;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   cursor: pointer;
   display: flex;
   align-items: center;
