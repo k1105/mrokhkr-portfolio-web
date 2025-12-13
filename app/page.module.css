@@ -7,29 +7,32 @@
   overflow: hidden;
 }
 
-@keyframes circleReveal {
+@keyframes rotateClockwise {
   from {
-    clip-path: circle(0% at 50% 50%);
+    transform: rotate(var(--initial-rotation, 0deg));
   }
   to {
-    clip-path: circle(100% at 50% 50%);
+    transform: rotate(calc(var(--initial-rotation, 0deg) + 360deg));
   }
 }
 
-@keyframes rotateClockwise {
+@keyframes rotateCounterClockwise {
   from {
-    transform: translate(-50%, -50%) rotate(var(--initial-rotation, 0deg));
+    transform: rotate(var(--initial-rotation, 0deg));
   }
   to {
-    transform: translate(-50%, -50%)
-      rotate(calc(var(--initial-rotation, 0deg) + 360deg));
+    transform: rotate(calc(var(--initial-rotation, 0deg) - 360deg));
   }
 }
 
 .circleMask {
-  animation: circleReveal 0.8s ease-in forwards,
-    rotateClockwise 30s linear infinite;
-  clip-path: circle(0% at 50% 50%);
+  animation: rotateClockwise 30s linear infinite;
+  transform-origin: center center;
+}
+
+.circleMaskCounterClockwise {
+  animation: rotateCounterClockwise 30s linear infinite;
+  transform-origin: center center;
 }
 
 .page {

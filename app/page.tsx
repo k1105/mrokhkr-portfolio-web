@@ -14,6 +14,7 @@ interface Circle {
   imageIndex?: number; // 青い円用の画像インデックス
   imagePath?: string; // 赤い円用の画像パス
   initialRotation?: number; // 初期回転角度（度）
+  rotationDirection?: "clockwise" | "counterclockwise"; // 回転方向
 }
 
 const MARGIN = 20;
@@ -43,7 +44,10 @@ const IMAGE_TO_HREF: Record<string, string> = {
 export default function Home() {
   const [circles, setCircles] = useState<Circle[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [circleScales, setCircleScales] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     const packStep = (circles: Circle[], width: number, height: number) => {
@@ -203,9 +207,11 @@ export default function Home() {
 
       fitToScreen(circles, width, height);
 
-      // 各円にランダムな初期回転角度を割り当て
+      // 各円にランダムな初期回転角度と回転方向を割り当て
       for (const circle of circles) {
         circle.initialRotation = Math.random() * 360;
+        circle.rotationDirection =
+          Math.random() < 0.5 ? "clockwise" : "counterclockwise";
       }
 
       return circles;
@@ -218,7 +224,9 @@ export default function Home() {
       const height = window.innerHeight;
       const newCircles = generatePackedCircles(width, height);
       setCircles(newCircles);
+      setCircleScales(new Array(newCircles.length).fill(0));
       setMounted(true);
+      startTimeRef.current = null;
     };
 
     updateCircles();
@@ -226,8 +234,89 @@ export default function Home() {
 
     return () => {
       window.removeEventListener("resize", updateCircles);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, []);
+
+  // アニメーションループ
+  useEffect(() => {
+    if (!mounted || circles.length === 0) return;
+
+    // Bouncyアニメーションのイージング関数
+    const easeOutBounce = (t: number): number => {
+      if (t < 1 / 2.75) {
+        return 7.5625 * t * t;
+      } else if (t < 2 / 2.75) {
+        return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+      } else if (t < 2.5 / 2.75) {
+        return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+      } else {
+        return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+      }
+    };
+
+    // Bouncyアニメーション（0→1.1→1.0）
+    const bouncyScale = (t: number): number => {
+      if (t < 0.7) {
+        // 0→1.1まで
+        const normalizedT = t / 0.7;
+        return normalizedT * 1.1;
+      } else {
+        // 1.1→1.0まで
+        const normalizedT = (t - 0.7) / 0.3;
+        const eased = easeOutBounce(normalizedT);
+        return 1.1 - eased * 0.1;
+      }
+    };
+
+    const animate = (currentTime: number) => {
+      if (startTimeRef.current === null) {
+        startTimeRef.current = currentTime;
+      }
+
+      const elapsed = (currentTime - startTimeRef.current) / 1000; // 秒単位
+      const duration = 0.8; // アニメーション時間（秒）
+      const delayPerCircle = 0.05; // 各円の遅延（秒）
+
+      // 左上から順にソートしたインデックス配列を作成
+      const sortedIndices = circles
+        .map((circle, index) => ({circle, index}))
+        .sort((a, b) => {
+          if (Math.abs(a.circle.y - b.circle.y) > 1) {
+            return a.circle.y - b.circle.y;
+          }
+          return a.circle.x - b.circle.x;
+        })
+        .map((item) => item.index);
+
+      const newScales = circles.map((_, index) => {
+        const delayIndex = sortedIndices.indexOf(index);
+        const delay = delayIndex * delayPerCircle;
+        const t = Math.max(0, Math.min(1, (elapsed - delay) / duration));
+
+        if (t <= 0) return 0;
+        if (t >= 1) return 1.0;
+        return bouncyScale(t);
+      });
+
+      setCircleScales(newScales);
+
+      // すべてのアニメーションが完了していない場合は続行
+      if (newScales.some((scale) => scale < 1.0)) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [mounted, circles]);
 
   if (!mounted) {
     return (
@@ -239,24 +328,6 @@ export default function Home() {
     );
   }
 
-  // 左上から順にソートしたインデックス配列を作成
-  const sortedIndices = circles
-    .map((circle, index) => ({circle, index}))
-    .sort((a, b) => {
-      // まずY座標（上から下）でソート
-      if (Math.abs(a.circle.y - b.circle.y) > 1) {
-        return a.circle.y - b.circle.y;
-      }
-      // Y座標が同じならX座標（左から右）でソート
-      return a.circle.x - b.circle.x;
-    })
-    .map((item) => item.index);
-
-  // 各要素の遅延順序を取得
-  const getDelayIndex = (index: number) => {
-    return sortedIndices.indexOf(index);
-  };
-
   return (
     <div
       ref={containerRef}
@@ -265,31 +336,38 @@ export default function Home() {
     >
       {circles.map((circle, index) => {
         const size = circle.r * 2 * 0.95; // 0.95倍に縮小
-        const delayIndex = getDelayIndex(index);
-        const delay = delayIndex * 0.05; // 各要素間で0.05秒ずつ遅延
         const initialRotation = circle.initialRotation || 0;
-        const baseStyle: React.CSSProperties = {
+        const rotationDirection = circle.rotationDirection || "clockwise";
+        const scale = circleScales[index] ?? 0;
+        // 中心座標を保持しながらスケールを適用
+        // circle.x, circle.yは円の中心座標なので、translate(-50%, -50%)で正確に配置
+        const wrapperStyle: React.CSSProperties = {
           position: "absolute",
           left: `${circle.x}px`,
           top: `${circle.y}px`,
-          animationDelay: `${delay}s`,
-          ["--initial-rotation" as string]: `${initialRotation}deg`,
+          transform: `translate(-50%, -50%) scale(${scale})`,
+          transformOrigin: "center center",
         };
+        const rotationClass =
+          rotationDirection === "clockwise"
+            ? styles.circleMask
+            : styles.circleMaskCounterClockwise;
 
         if (circle.isSpecial) {
           // 緑の円 → グレーの円
           return (
-            <div
-              key={`special-${index}`}
-              className={styles.circleMask}
-              style={{
-                ...baseStyle,
-                width: `${size}px`,
-                height: `${size}px`,
-                borderRadius: "50%",
-                backgroundColor: "#888",
-              }}
-            />
+            <div key={`special-${index}`} style={wrapperStyle}>
+              <div
+                className={rotationClass}
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  borderRadius: "50%",
+                  backgroundColor: "#888",
+                  ["--initial-rotation" as string]: `${initialRotation}deg`,
+                }}
+              />
+            </div>
           );
         } else if (circle.type === "large") {
           // 赤い円 → SVG画像（クリック可能）
@@ -298,13 +376,14 @@ export default function Home() {
             : null;
           const circleContent = (
             <div
-              className={styles.circleMask}
+              className={rotationClass}
               style={{
                 width: `${size}px`,
                 height: `${size}px`,
                 borderRadius: "50%",
                 overflow: "hidden",
                 cursor: href ? "pointer" : "default",
+                ["--initial-rotation" as string]: `${initialRotation}deg`,
               }}
             >
               <Image
@@ -323,50 +402,51 @@ export default function Home() {
 
           if (href) {
             return (
-              <Link
-                key={`large-${index}`}
-                href={href}
-                style={{
-                  ...baseStyle,
-                  textDecoration: "none",
-                  display: "block",
-                }}
-              >
-                {circleContent}
-              </Link>
+              <div key={`large-${index}`} style={wrapperStyle}>
+                <Link
+                  href={href}
+                  style={{
+                    textDecoration: "none",
+                    display: "block",
+                  }}
+                >
+                  {circleContent}
+                </Link>
+              </div>
             );
           }
 
           return (
-            <div key={`large-${index}`} style={baseStyle}>
+            <div key={`large-${index}`} style={wrapperStyle}>
               {circleContent}
             </div>
           );
         } else {
           // 青い円 → PNG画像（正円でクロップ）
           return (
-            <div
-              key={`small-${index}`}
-              className={styles.circleMask}
-              style={{
-                ...baseStyle,
-                width: `${size}px`,
-                height: `${size}px`,
-                borderRadius: "50%",
-                overflow: "hidden",
-              }}
-            >
-              <Image
-                src={`/nav/nav_works_${circle.imageIndex}.png`}
-                alt=""
-                width={size}
-                height={size}
+            <div key={`small-${index}`} style={wrapperStyle}>
+              <div
+                className={rotationClass}
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  ["--initial-rotation" as string]: `${initialRotation}deg`,
                 }}
-              />
+              >
+                <Image
+                  src={`/nav/nav_works_${circle.imageIndex}.png`}
+                  alt=""
+                  width={size}
+                  height={size}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
             </div>
           );
         }
