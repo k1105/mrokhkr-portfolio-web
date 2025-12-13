@@ -253,8 +253,13 @@ export default function CircleBackground() {
       circlesRef.current = newCircles;
       setCircles(newCircles);
 
-      if (animationCompletedRef.current) {
+      // ★修正点: TOPページ以外への直接アクセス時はアニメーションをスキップ
+      // pathnameが "/" でない場合、最初から完了済みとして扱う
+      const shouldSkipAnimation = pathname !== "/";
+
+      if (animationCompletedRef.current || shouldSkipAnimation) {
         setCircleScales(new Array(newCircles.length).fill(1.0));
+        animationCompletedRef.current = true; // 強制的に完了状態にする
       } else {
         setCircleScales(new Array(newCircles.length).fill(0));
       }
@@ -265,7 +270,8 @@ export default function CircleBackground() {
     };
 
     updateCircles();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 初回のみ実行
 
   // 登場アニメーション
   useEffect(() => {
@@ -346,26 +352,22 @@ export default function CircleBackground() {
     };
   }, [mounted, circles]);
 
-  // ★修正点1: パス変更監視と状態の引き継ぎ・クリーンアップ
+  // パス変更監視と状態の引き継ぎ・クリーンアップ
   useEffect(() => {
     if (isActive) {
-      // 個別ページ: 常に全開にする
       setClipProgress(1);
 
-      // もしTopページからの遷移アニメーション情報(clickedNav)が残っていたら、
-      // 遷移完了を確認したこのタイミングでクリーンアップする（バトンタッチ完了）
       if (clickedNav !== null) {
         setClickedNav(null);
       }
     } else if (pathname === "/") {
-      // トップページ: クリック中でなければ閉じる
       if (clickedNav === null) {
         setClipProgress(0);
       }
     }
   }, [pathname, isActive, clickedNav]);
 
-  // ★修正点2: クリック時のアニメーションと遷移処理
+  // クリック時のアニメーションと遷移処理
   useEffect(() => {
     if (pathname !== "/" || clickedNav === null) {
       return;
@@ -399,11 +401,7 @@ export default function CircleBackground() {
       if (progress < 1) {
         clipAnimationRef.current = requestAnimationFrame(animate);
       } else {
-        // アニメーション完了
         router.push(href);
-        // 【重要】ここで setClickedNav(null) や setClipProgress(0) を呼ばない。
-        // そうしてしまうと、遷移中の一瞬に背景が閉じてしまう（フリッキングの原因）。
-        // クリーンアップは上記の pathname 監視 useEffect に任せる。
       }
     };
 
@@ -428,7 +426,7 @@ export default function CircleBackground() {
     if (!href || !circle.imagePath) return;
 
     setClickedNav(index);
-    setClipProgress(0); // アニメーション開始時は0から
+    setClipProgress(0);
   };
 
   if (!mounted) {
@@ -458,7 +456,6 @@ export default function CircleBackground() {
 
   const activeCircle = isActive ? circles[activeCircleIndex] : null;
   const clickedCircle = clickedNav !== null ? circles[clickedNav] : null;
-  // clickedNavが残っていても、activeCircleが特定できていればそちらを優先する（あるいは同じものを指す）
   const displayCircle = activeCircle || clickedCircle;
   const displayBackgroundColor = displayCircle?.imagePath
     ? getBackgroundColor(displayCircle.imagePath)
