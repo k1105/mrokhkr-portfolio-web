@@ -1,0 +1,45 @@
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@keyframes rotateClockwise {
+  from {
+    transform: rotate(var(--initial-rotation, 0deg));
+  }
+  to {
+    transform: rotate(calc(var(--initial-rotation, 0deg) + 360deg));
+  }
+}
+
+@keyframes rotateCounterClockwise {
+  from {
+    transform: rotate(var(--initial-rotation, 0deg));
+  }
+  to {
+    transform: rotate(calc(var(--initial-rotation, 0deg) - 360deg));
+  }
+}
+
+.circleMask {
+  animation: rotateClockwise 250s linear infinite;
+  transform-origin: center center;
+}
+
+.circleMaskCounterClockwise {
+  animation: rotateCounterClockwise 250s linear infinite;
+  transform-origin: center center;
+}
+
+.clipOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}

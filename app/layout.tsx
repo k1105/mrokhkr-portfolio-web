@@ -4,6 +4,7 @@ import Image from "next/image";
 import "./globals.css";
 import styles from "./layout.module.css";
 import HamburgerMenu from "./components/HamburgerMenu";
+import CircleBackground from "./components/CircleBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +56,9 @@ export default function RootLayout({
 
         {/* 左下: ハンバーガーメニュー */}
         <HamburgerMenu />
+
+        {/* 円の背景 */}
+        <CircleBackground />
 
         {children}
       </body>

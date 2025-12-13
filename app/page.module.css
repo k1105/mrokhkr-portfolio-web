@@ -26,12 +26,12 @@
 }
 
 .circleMask {
-  animation: rotateClockwise 180s linear infinite;
+  animation: rotateClockwise 250s linear infinite;
   transform-origin: center center;
 }
 
 .circleMaskCounterClockwise {
-  animation: rotateCounterClockwise 180s linear infinite;
+  animation: rotateCounterClockwise 250s linear infinite;
   transform-origin: center center;
 }
 

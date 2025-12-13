@@ -13,7 +13,7 @@ export default function VisualizingCovid19Page() {
           <h1 className={styles.title}>Visualizing the COVID-19 pandemic</h1>
           <p className={styles.subtitle}>Diagram / 2022.2.12</p>
         </div>
-        
+
         <div className={styles.imageWrapper}>
           <Image
             src="/works/works_thumbnail_0.png"
@@ -26,22 +26,12 @@ export default function VisualizingCovid19Page() {
         </div>
 
         <div className={styles.textContent}>
-          <p>
-            XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-          </p>
-          <p>
-            XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-          </p>
-          <p>
-            XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-          </p>
-          <p>
-            XXXXXXXXXXXXXXXXXXXX
-          </p>
+          <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</p>
+          <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</p>
+          <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</p>
+          <p>XXXXXXXXXXXXXXXXXXXX</p>
         </div>
       </div>
     </div>
   );
 }
-
-

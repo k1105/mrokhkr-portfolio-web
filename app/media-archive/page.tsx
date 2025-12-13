@@ -1,16 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import HeaderImage from "../components/HeaderImage";
+// import HeaderImage from "../components/HeaderImage";
 import styles from "./page.module.css";
 
 export default function MediaArchivePage() {
   return (
     <div className={styles.container}>
-      <HeaderImage
+      {/* <HeaderImage
         src="/header/header_media_archive.svg"
         alt="Media Archive Header"
-      />
+      /> */}
       <div className={styles.content}>
         <section className={styles.section}>
           <div className={styles.imageGrid}>
