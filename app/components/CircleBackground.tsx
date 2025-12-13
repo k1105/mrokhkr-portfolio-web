@@ -389,7 +389,7 @@ export default function CircleBackground() {
     }
 
     const startTime = Date.now();
-    const duration = 2000;
+    const duration = 1600;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
