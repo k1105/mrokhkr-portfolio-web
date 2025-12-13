@@ -11,10 +11,10 @@ interface Circle {
   r: number;
   type: "large" | "small";
   isSpecial: boolean;
-  imageIndex?: number; // 青い円用の画像インデックス
-  imagePath?: string; // 赤い円用の画像パス
-  initialRotation?: number; // 初期回転角度（度）
-  rotationDirection?: "clockwise" | "counterclockwise"; // 回転方向
+  imageIndex?: number;
+  imagePath?: string;
+  initialRotation?: number;
+  rotationDirection?: "clockwise" | "counterclockwise";
 }
 
 const MARGIN = 20;
@@ -23,7 +23,6 @@ const NUM_SMALL_NORMAL = 8;
 const NUM_SMALL_SPECIAL = 2;
 const SIZE_RATIO = 0.7;
 
-// 赤い円用の画像パスと遷移先のマッピング
 const RED_CIRCLE_IMAGES = [
   "/nav/nav_about.svg",
   "/nav/nav_contact.svg",
@@ -32,7 +31,6 @@ const RED_CIRCLE_IMAGES = [
   "/nav/nav_works.svg",
 ];
 
-// 画像パスに対応する遷移先
 const IMAGE_TO_HREF: Record<string, string> = {
   "/nav/nav_about.svg": "/about",
   "/nav/nav_contact.svg": "/",
@@ -41,7 +39,6 @@ const IMAGE_TO_HREF: Record<string, string> = {
   "/nav/nav_works.svg": "/works",
 };
 
-// 遷移先に対応する画像パス（逆引き用）
 const HREF_TO_IMAGE: Record<string, string> = {
   "/about": "/nav/nav_about.svg",
   "/": "/nav/nav_contact.svg",
@@ -50,7 +47,6 @@ const HREF_TO_IMAGE: Record<string, string> = {
   "/works": "/nav/nav_works.svg",
 };
 
-// 画像パスに対応する背景色
 const getBackgroundColor = (imagePath: string | undefined): string => {
   if (!imagePath) return "transparent";
 
@@ -93,7 +89,7 @@ export default function CircleBackground() {
   // 現在のパスに基づいてactiveな円のインデックスを取得
   const getActiveCircleIndex = (): number | null => {
     const currentCircles = circlesRef.current;
-    if (pathname === "/" || currentCircles.length === 0) return null; // トップページではactiveなし
+    if (pathname === "/" || currentCircles.length === 0) return null;
 
     const imagePath = HREF_TO_IMAGE[pathname];
     if (!imagePath) return null;
@@ -105,14 +101,12 @@ export default function CircleBackground() {
   const activeCircleIndex = getActiveCircleIndex();
   const isActive = activeCircleIndex !== null;
 
-  // 円の生成（一度だけ実行）
+  // 円の生成（初期化）
   useEffect(() => {
     if (isInitializedRef.current) return;
 
     const packStep = (circles: Circle[], width: number, height: number) => {
       const aspectRatio = width / height;
-
-      // 1. 「最も下にある赤い円」を見つける
       let lowestRed: Circle | null = null;
       let maxY = -Infinity;
 
@@ -125,47 +119,32 @@ export default function CircleBackground() {
         }
       }
 
-      // 2. 物理計算ループ
       for (let i = 0; i < circles.length; i++) {
         const c1 = circles[i];
 
         if (c1.isSpecial) {
-          // --- 特殊な円（緑）の挙動 ---
           if (lowestRed) {
-            // A. アンカー引力：一番下の赤円に向かって強く引き寄せる
             const dx = lowestRed.x - c1.x;
             const dy = lowestRed.y - c1.y;
-
-            // 常に少し下方向(y+)へ力を加え、赤円の「底」へ誘導する
-            c1.x += dx * 0.05; // X方向は素直に寄る
-            c1.y += dy * 0.05 + 0.5; // Y方向は寄りつつ、常に「下へ落ちる力」を加える
+            c1.x += dx * 0.05;
+            c1.y += dy * 0.05 + 0.5;
           }
         } else {
-          // --- 通常の円（赤・青）の挙動 ---
-          // 画面アスペクト比に応じた重力
           const baseGravity = 0.005;
           const gravityX = baseGravity / aspectRatio;
           const gravityY = baseGravity * aspectRatio;
-
-          // 赤と青は少し上(-20)を目指して集まる
           c1.x -= c1.x * gravityX;
           c1.y -= (c1.y - -20) * gravityY;
         }
 
-        // --- 3. 衝突解決（ここが配置の要） ---
         for (let j = 0; j < circles.length; j++) {
           if (i === j) continue;
           const c2 = circles[j];
-
           const dx = c1.x - c2.x;
           const dy = c1.y - c2.y;
           const d = Math.sqrt(dx * dx + dy * dy);
 
-          // バリア距離の計算
           let gap = 0;
-
-          // 緑(Special) と 青(Small Normal) は非常に仲が悪い（大きなバリア）
-          // これにより緑は青の集団に入り込めず、赤の表面に押し出される
           if (
             (c1.isSpecial && c2.type === "small" && !c2.isSpecial) ||
             (c2.isSpecial && c1.type === "small" && !c1.isSpecial)
@@ -174,14 +153,11 @@ export default function CircleBackground() {
           }
 
           const minDist = c1.r + c2.r + gap;
-
           if (d < minDist && d > 0) {
             const overlap = minDist - d;
-            const force = overlap / 2; // 反発力
-
+            const force = overlap / 2;
             const nx = dx / d;
             const ny = dy / d;
-
             c1.x += nx * force;
             c1.y += ny * force;
           }
@@ -205,7 +181,6 @@ export default function CircleBackground() {
       const clusterH = maxY - minY;
       const targetW = width - MARGIN * 2;
       const targetH = height - MARGIN * 2;
-
       const finalScale = Math.min(targetW / clusterW, targetH / clusterH);
       const clusterCenterX = (minX + maxX) / 2;
       const clusterCenterY = (minY + maxY) / 2;
@@ -223,7 +198,6 @@ export default function CircleBackground() {
       const circles: Circle[] = [];
       const baseR = 10;
 
-      // 1. 大きい円 (赤)
       for (let i = 0; i < NUM_LARGE; i++) {
         circles.push({
           x: (Math.random() - 0.5) * 2,
@@ -235,7 +209,6 @@ export default function CircleBackground() {
         });
       }
 
-      // 2. 普通の小さい円 (青)
       for (let i = 0; i < NUM_SMALL_NORMAL; i++) {
         circles.push({
           x: (Math.random() - 0.5) * 2,
@@ -247,7 +220,6 @@ export default function CircleBackground() {
         });
       }
 
-      // 3. 特殊な小さい円 (緑) - 最初は遠くに置いておく
       for (let i = 0; i < NUM_SMALL_SPECIAL; i++) {
         circles.push({
           x: (Math.random() - 0.5) * 2,
@@ -258,15 +230,12 @@ export default function CircleBackground() {
         });
       }
 
-      // 物理演算
       const iterations = 3000;
       for (let i = 0; i < iterations; i++) {
         packStep(circles, width, height);
       }
-
       fitToScreen(circles, width, height);
 
-      // 各円にランダムな初期回転角度と回転方向を割り当て
       for (const circle of circles) {
         circle.initialRotation = Math.random() * 360;
         circle.rotationDirection =
@@ -278,20 +247,18 @@ export default function CircleBackground() {
 
     const updateCircles = () => {
       if (!containerRef.current) return;
-
       const width = window.innerWidth;
       const height = window.innerHeight;
       const newCircles = generatePackedCircles(width, height);
       circlesRef.current = newCircles;
       setCircles(newCircles);
-      
-      // アニメーション完了済みの場合は、スケールを1.0で開始
+
       if (animationCompletedRef.current) {
         setCircleScales(new Array(newCircles.length).fill(1.0));
       } else {
         setCircleScales(new Array(newCircles.length).fill(0));
       }
-      
+
       setMounted(true);
       startTimeRef.current = null;
       isInitializedRef.current = true;
@@ -300,17 +267,15 @@ export default function CircleBackground() {
     updateCircles();
   }, []);
 
-  // アニメーションループ（一度だけ実行）
+  // 登場アニメーション
   useEffect(() => {
     if (!mounted || circles.length === 0 || animationCompletedRef.current) {
-      // アニメーション完了済みの場合は、スケールを1.0に設定
       if (animationCompletedRef.current && circles.length > 0) {
         setCircleScales(new Array(circles.length).fill(1.0));
       }
       return;
     }
 
-    // Bouncyアニメーションのイージング関数
     const easeOutBounce = (t: number): number => {
       if (t < 1 / 2.75) {
         return 7.5625 * t * t;
@@ -323,14 +288,11 @@ export default function CircleBackground() {
       }
     };
 
-    // Bouncyアニメーション（0→1.1→1.0）
     const bouncyScale = (t: number): number => {
       if (t < 0.7) {
-        // 0→1.1まで
         const normalizedT = t / 0.7;
         return normalizedT * 1.1;
       } else {
-        // 1.1→1.0まで
         const normalizedT = (t - 0.7) / 0.3;
         const eased = easeOutBounce(normalizedT);
         return 1.1 - eased * 0.1;
@@ -342,11 +304,10 @@ export default function CircleBackground() {
         startTimeRef.current = currentTime;
       }
 
-      const elapsed = (currentTime - startTimeRef.current) / 1000; // 秒単位
-      const duration = 0.8; // アニメーション時間（秒）
-      const delayPerCircle = 0.05; // 各円の遅延（秒）
+      const elapsed = (currentTime - startTimeRef.current) / 1000;
+      const duration = 0.8;
+      const delayPerCircle = 0.05;
 
-      // 左上から順にソートしたインデックス配列を作成
       const sortedIndices = circles
         .map((circle, index) => ({circle, index}))
         .sort((a, b) => {
@@ -369,7 +330,6 @@ export default function CircleBackground() {
 
       setCircleScales(newScales);
 
-      // すべてのアニメーションが完了していない場合は続行
       if (newScales.some((scale) => scale < 1.0)) {
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
@@ -386,33 +346,33 @@ export default function CircleBackground() {
     };
   }, [mounted, circles]);
 
-  // パス変更時にclipProgressを初期化（個別ページでは1、トップページでは0）
+  // ★修正点1: パス変更監視と状態の引き継ぎ・クリーンアップ
   useEffect(() => {
     if (isActive) {
-      // 個別ページではclip-pathを完全に開いた状態にする
+      // 個別ページ: 常に全開にする
       setClipProgress(1);
+
+      // もしTopページからの遷移アニメーション情報(clickedNav)が残っていたら、
+      // 遷移完了を確認したこのタイミングでクリーンアップする（バトンタッチ完了）
+      if (clickedNav !== null) {
+        setClickedNav(null);
+      }
     } else if (pathname === "/") {
-      // トップページではclip-pathを閉じた状態にする（アニメーション中でない場合のみ）
+      // トップページ: クリック中でなければ閉じる
       if (clickedNav === null) {
         setClipProgress(0);
       }
     }
-    // パス変更時はclickedNavをリセットしない（アニメーション中の場合があるため）
   }, [pathname, isActive, clickedNav]);
 
-  // クリック時のclip-pathアニメーション処理（トップページのみ）
+  // ★修正点2: クリック時のアニメーションと遷移処理
   useEffect(() => {
     if (pathname !== "/" || clickedNav === null) {
       return;
     }
 
     const currentCircles = circlesRef.current;
-    if (currentCircles.length === 0) {
-      return;
-    }
-
-    // circles配列が準備できていることを確認
-    if (clickedNav >= currentCircles.length) {
+    if (currentCircles.length === 0 || clickedNav >= currentCircles.length) {
       return;
     }
 
@@ -427,13 +387,11 @@ export default function CircleBackground() {
     }
 
     const startTime = Date.now();
-    const duration = 2000; // アニメーション時間（ミリ秒）
+    const duration = 2000;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
-      // イージング関数（ease-out）
       const eased = 1 - Math.pow(1 - progress, 3);
 
       setClipProgress(eased);
@@ -441,10 +399,11 @@ export default function CircleBackground() {
       if (progress < 1) {
         clipAnimationRef.current = requestAnimationFrame(animate);
       } else {
-        // アニメーション完了後に遷移
+        // アニメーション完了
         router.push(href);
-        setClickedNav(null);
-        setClipProgress(0);
+        // 【重要】ここで setClickedNav(null) や setClipProgress(0) を呼ばない。
+        // そうしてしまうと、遷移中の一瞬に背景が閉じてしまう（フリッキングの原因）。
+        // クリーンアップは上記の pathname 監視 useEffect に任せる。
       }
     };
 
@@ -462,14 +421,14 @@ export default function CircleBackground() {
     circle: Circle,
     index: number
   ) => {
-    if (pathname !== "/") return; // トップページでのみ有効
+    if (pathname !== "/") return;
     e.preventDefault();
     e.stopPropagation();
     const href = circle.imagePath ? IMAGE_TO_HREF[circle.imagePath] : null;
     if (!href || !circle.imagePath) return;
 
     setClickedNav(index);
-    setClipProgress(0);
+    setClipProgress(0); // アニメーション開始時は0から
   };
 
   if (!mounted) {
@@ -482,14 +441,12 @@ export default function CircleBackground() {
     );
   }
 
-  // clip-pathの計算
   const getClipPath = (circle: Circle | null) => {
     if (!circle || typeof window === "undefined") return "none";
 
     const size = circle.r * 2 * 0.95;
     const radius = size / 2;
     const startRadius = radius;
-    // 画面の対角線の長さを計算（最大半径）
     const maxRadius = Math.sqrt(
       window.innerWidth ** 2 + window.innerHeight ** 2
     );
@@ -501,6 +458,7 @@ export default function CircleBackground() {
 
   const activeCircle = isActive ? circles[activeCircleIndex] : null;
   const clickedCircle = clickedNav !== null ? circles[clickedNav] : null;
+  // clickedNavが残っていても、activeCircleが特定できていればそちらを優先する（あるいは同じものを指す）
   const displayCircle = activeCircle || clickedCircle;
   const displayBackgroundColor = displayCircle?.imagePath
     ? getBackgroundColor(displayCircle.imagePath)
@@ -512,7 +470,6 @@ export default function CircleBackground() {
       className={styles.container}
       suppressHydrationWarning
     >
-      {/* clip-pathアニメーション用のoverlay */}
       {displayCircle && (
         <div
           className={styles.clipOverlay}
@@ -528,7 +485,6 @@ export default function CircleBackground() {
             pointerEvents: "none",
           }}
         >
-          {/* 表示されるnavの画像 */}
           {displayCircle.imagePath && (
             <div
               style={{
@@ -551,7 +507,9 @@ export default function CircleBackground() {
                   height: "100%",
                   borderRadius: "50%",
                   overflow: "hidden",
-                  ["--initial-rotation" as string]: `${displayCircle.initialRotation || 0}deg`,
+                  ["--initial-rotation" as string]: `${
+                    displayCircle.initialRotation || 0
+                  }deg`,
                 }}
               >
                 <Image
@@ -572,12 +530,10 @@ export default function CircleBackground() {
       )}
 
       {circles.map((circle, index) => {
-        const size = circle.r * 2 * 0.95; // 0.95倍に縮小
+        const size = circle.r * 2 * 0.95;
         const initialRotation = circle.initialRotation || 0;
         const rotationDirection = circle.rotationDirection || "clockwise";
         const scale = circleScales[index] ?? 0;
-        // 中心座標を保持しながらスケールを適用
-        // circle.x, circle.yは円の中心座標なので、translate(-50%, -50%)で正確に配置
         const wrapperStyle: React.CSSProperties = {
           position: "absolute",
           left: `${circle.x}px`,
@@ -591,14 +547,11 @@ export default function CircleBackground() {
             ? styles.circleMask
             : styles.circleMaskCounterClockwise;
 
-        // トップページでアニメーション中、または個別ページでactiveな円以外は非表示
-        // ただし、クリックされた円自体は表示し続ける（アニメーション用）
         const isHidden =
           (pathname === "/" && clickedNav !== null && clickedNav !== index) ||
           (isActive && activeCircleIndex !== index);
 
         if (circle.isSpecial) {
-          // 緑の円 → グレーの円
           return (
             <div
               key={`special-${index}`}
@@ -621,7 +574,6 @@ export default function CircleBackground() {
             </div>
           );
         } else if (circle.type === "large") {
-          // 赤い円 → SVG画像（クリック可能）
           const href = circle.imagePath
             ? IMAGE_TO_HREF[circle.imagePath]
             : null;
@@ -680,7 +632,6 @@ export default function CircleBackground() {
             </div>
           );
         } else {
-          // 青い円 → PNG画像（正円でクロップ）
           return (
             <div
               key={`small-${index}`}
