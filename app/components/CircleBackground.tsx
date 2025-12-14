@@ -15,6 +15,9 @@ interface Circle {
   imagePath?: string;
   initialRotation?: number;
   rotationDirection?: "clockwise" | "counterclockwise";
+  // アニメーション用の個体差パラメータを追加
+  animDelay?: number;
+  animDuration?: number;
 }
 
 const MARGIN = 20;
@@ -236,10 +239,16 @@ export default function CircleBackground() {
       }
       fitToScreen(circles, width, height);
 
+      // ★修正: アニメーションの個体差（生命感）を事前に割り振る
       for (const circle of circles) {
         circle.initialRotation = Math.random() * 360;
         circle.rotationDirection =
           Math.random() < 0.5 ? "clockwise" : "counterclockwise";
+
+        // 遅延: 0秒〜0.5秒の間で完全にランダム（ポコポコ感）
+        circle.animDelay = Math.random() * 0.5;
+        // 時間: 1.0秒〜1.4秒の間でばらつきを持たせる（個体差）
+        circle.animDuration = 1.0 + Math.random() * 0.4;
       }
 
       return circles;
@@ -253,13 +262,11 @@ export default function CircleBackground() {
       circlesRef.current = newCircles;
       setCircles(newCircles);
 
-      // ★修正点: TOPページ以外への直接アクセス時はアニメーションをスキップ
-      // pathnameが "/" でない場合、最初から完了済みとして扱う
       const shouldSkipAnimation = pathname !== "/";
 
       if (animationCompletedRef.current || shouldSkipAnimation) {
         setCircleScales(new Array(newCircles.length).fill(1.0));
-        animationCompletedRef.current = true; // 強制的に完了状態にする
+        animationCompletedRef.current = true;
       } else {
         setCircleScales(new Array(newCircles.length).fill(0));
       }
@@ -271,9 +278,9 @@ export default function CircleBackground() {
 
     updateCircles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 初回のみ実行
+  }, []);
 
-  // 登場アニメーション
+  // ★修正: 粘性と生命感のある登場アニメーション
   useEffect(() => {
     if (!mounted || circles.length === 0 || animationCompletedRef.current) {
       if (animationCompletedRef.current && circles.length > 0) {
@@ -282,27 +289,16 @@ export default function CircleBackground() {
       return;
     }
 
-    const easeOutBounce = (t: number): number => {
-      if (t < 1 / 2.75) {
-        return 7.5625 * t * t;
-      } else if (t < 2 / 2.75) {
-        return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
-      } else if (t < 2.5 / 2.75) {
-        return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
-      } else {
-        return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
-      }
-    };
+    // ★Easingの変更: Viscous Pop (粘性のあるポップ)
+    // easeOutBackをベースに調整。
+    // 細胞分裂のように「ググッと広がって、少し行き過ぎて(1.05)、ゆっくり戻る」動き。
+    // 振動（Elastic）のような不安定さを排除。
+    const viscousPop = (x: number): number => {
+      const c1 = 1.2; // オーバーシュート量（小さいほど控えめな膨らみ）
+      const c3 = c1 + 1;
 
-    const bouncyScale = (t: number): number => {
-      if (t < 0.7) {
-        const normalizedT = t / 0.7;
-        return normalizedT * 1.1;
-      } else {
-        const normalizedT = (t - 0.7) / 0.3;
-        const eased = easeOutBounce(normalizedT);
-        return 1.1 - eased * 0.1;
-      }
+      // tが1になる直前で膨らみ、最後に戻る
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
     };
 
     const animate = (currentTime: number) => {
@@ -311,34 +307,31 @@ export default function CircleBackground() {
       }
 
       const elapsed = (currentTime - startTimeRef.current) / 1000;
-      const duration = 0.8;
-      const delayPerCircle = 0.05;
 
-      const sortedIndices = circles
-        .map((circle, index) => ({circle, index}))
-        .sort((a, b) => {
-          if (Math.abs(a.circle.y - b.circle.y) > 1) {
-            return a.circle.y - b.circle.y;
-          }
-          return a.circle.x - b.circle.x;
-        })
-        .map((item) => item.index);
+      let allFinished = true;
 
-      const newScales = circles.map((_, index) => {
-        const delayIndex = sortedIndices.indexOf(index);
-        const delay = delayIndex * delayPerCircle;
+      const newScales = circles.map((circle) => {
+        // 事前に割り振ったランダムな遅延と時間を使用
+        // これにより「波」ではなく「あちこちから湧き出る」動きになる
+        const delay = circle.animDelay || 0;
+        const duration = circle.animDuration || 1.2;
+
+        // 時間の正規化
         const t = Math.max(0, Math.min(1, (elapsed - delay) / duration));
 
+        if (t < 1) allFinished = false;
         if (t <= 0) return 0;
         if (t >= 1) return 1.0;
-        return bouncyScale(t);
+
+        return viscousPop(t);
       });
 
       setCircleScales(newScales);
 
-      if (newScales.some((scale) => scale < 1.0)) {
+      if (!allFinished) {
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
+        setCircleScales(new Array(circles.length).fill(1.0));
         animationCompletedRef.current = true;
       }
     };
@@ -352,11 +345,10 @@ export default function CircleBackground() {
     };
   }, [mounted, circles]);
 
-  // パス変更監視と状態の引き継ぎ・クリーンアップ
+  // パス変更監視
   useEffect(() => {
     if (isActive) {
       setClipProgress(1);
-
       if (clickedNav !== null) {
         setClickedNav(null);
       }
@@ -367,26 +359,19 @@ export default function CircleBackground() {
     }
   }, [pathname, isActive, clickedNav]);
 
-  // クリック時のアニメーションと遷移処理
+  // クリック遷移アニメーション
   useEffect(() => {
-    if (pathname !== "/" || clickedNav === null) {
-      return;
-    }
+    if (pathname !== "/" || clickedNav === null) return;
 
     const currentCircles = circlesRef.current;
-    if (currentCircles.length === 0 || clickedNav >= currentCircles.length) {
+    if (currentCircles.length === 0 || clickedNav >= currentCircles.length)
       return;
-    }
 
     const circle = currentCircles[clickedNav];
-    if (!circle || !circle.imagePath) {
-      return;
-    }
+    if (!circle || !circle.imagePath) return;
 
     const href = IMAGE_TO_HREF[circle.imagePath];
-    if (!href) {
-      return;
-    }
+    if (!href) return;
 
     const startTime = Date.now();
     const duration = 1600;
@@ -441,7 +426,6 @@ export default function CircleBackground() {
 
   const getClipPath = (circle: Circle | null) => {
     if (!circle || typeof window === "undefined") return "none";
-
     const size = circle.r * 2 * 0.95;
     const radius = size / 2;
     const startRadius = radius;
@@ -531,6 +515,9 @@ export default function CircleBackground() {
         const initialRotation = circle.initialRotation || 0;
         const rotationDirection = circle.rotationDirection || "clockwise";
         const scale = circleScales[index] ?? 0;
+
+        // will-changeでブラウザに最適化を促しつつ、
+        // アニメーションをtransformのみに限定して描画負荷を下げる
         const wrapperStyle: React.CSSProperties = {
           position: "absolute",
           left: `${circle.x}px`,
@@ -538,6 +525,7 @@ export default function CircleBackground() {
           transform: `translate(-50%, -50%) scale(${scale})`,
           transformOrigin: "center center",
           zIndex: -1,
+          willChange: "transform",
         };
         const rotationClass =
           rotationDirection === "clockwise"
