@@ -1,6 +1,8 @@
 :root {
-  --background: #f7f7f6;
+  --background: #fbfcfd;
   --foreground: #171717;
+  --yellow-background: #ffffb9;
+  --purple-background: #f1ebfa;
 }
 
 html,

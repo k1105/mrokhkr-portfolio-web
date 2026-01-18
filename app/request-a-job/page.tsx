@@ -11,7 +11,7 @@ export default function RequestAJobPage() {
         alt="Contact Header"
       />
       <div className={styles.content}>
-        <h2 className={styles.formTitle}>お問い合わせフォーム</h2>
+        <h2 className={styles.formTitle}>仕事をたのんでみる Request a job</h2>
 
         <form className={styles.form}>
           <div className={styles.formGroup}>

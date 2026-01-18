@@ -36,7 +36,7 @@ const RED_CIRCLE_IMAGES = [
 
 const IMAGE_TO_HREF: Record<string, string> = {
   "/nav/nav_about.svg": "/about",
-  "/nav/nav_contact.svg": "/",
+  "/nav/nav_contact.svg": "/send-a-message-on-sns",
   "/nav/nav_media_archive.svg": "/media-archive",
   "/nav/nav_request_a_job.svg": "/request-a-job",
   "/nav/nav_works.svg": "/works",
@@ -45,6 +45,7 @@ const IMAGE_TO_HREF: Record<string, string> = {
 const HREF_TO_IMAGE: Record<string, string> = {
   "/about": "/nav/nav_about.svg",
   "/": "/nav/nav_contact.svg",
+  "/send-a-message-on-sns": "/nav/nav_contact.svg",
   "/media-archive": "/nav/nav_media_archive.svg",
   "/request-a-job": "/nav/nav_request_a_job.svg",
   "/works": "/nav/nav_works.svg",
@@ -65,9 +66,9 @@ const getBackgroundColor = (imagePath: string | undefined): string => {
   ];
 
   if (yellowBackgrounds.includes(imagePath)) {
-    return "#ffffa0";
+    return "var(--yellow-background)";
   } else if (pinkBackgrounds.includes(imagePath)) {
-    return "#ffebeb";
+    return "var(--purple-background)";
   }
 
   return "transparent";
@@ -427,15 +428,19 @@ export default function CircleBackground() {
   const getClipPath = (circle: Circle | null) => {
     if (!circle || typeof window === "undefined") return "none";
     const size = circle.r * 2 * 0.95;
-    const radius = size / 2;
-    const startRadius = radius;
+    const radiusX = size / 2;
+    const radiusY = radiusX * (81 / 80); // 80:81の比率
+    const startRadiusX = radiusX;
+    const startRadiusY = radiusY;
     const maxRadius = Math.sqrt(
       window.innerWidth ** 2 + window.innerHeight ** 2
     );
-    const currentRadius =
-      startRadius + (maxRadius - startRadius) * clipProgress;
+    const currentRadiusX =
+      startRadiusX + (maxRadius - startRadiusX) * clipProgress;
+    const currentRadiusY =
+      startRadiusY + (maxRadius * (81 / 80) - startRadiusY) * clipProgress;
 
-    return `circle(${currentRadius}px at ${circle.x}px ${circle.y}px)`;
+    return `ellipse(${currentRadiusX}px ${currentRadiusY}px at ${circle.x}px ${circle.y}px)`;
   };
 
   const activeCircle = isActive ? circles[activeCircleIndex] : null;
@@ -486,7 +491,7 @@ export default function CircleBackground() {
                 style={{
                   width: "100%",
                   height: "100%",
-                  borderRadius: "50%",
+                  clipPath: "ellipse(50% 50.625% at center)",
                   overflow: "hidden",
                   ["--initial-rotation" as string]: `${
                     displayCircle.initialRotation || 0
@@ -551,7 +556,7 @@ export default function CircleBackground() {
                 style={{
                   width: `${size}px`,
                   height: `${size}px`,
-                  borderRadius: "50%",
+                  clipPath: "ellipse(50% 50.625% at center)",
                   backgroundColor: "#888",
                   ["--initial-rotation" as string]: `${initialRotation}deg`,
                 }}
@@ -570,7 +575,7 @@ export default function CircleBackground() {
               style={{
                 width: `${size}px`,
                 height: `${size}px`,
-                borderRadius: "50%",
+                clipPath: "ellipse(50% 50.625% at center)",
                 overflow: "hidden",
                 backgroundColor: backgroundColor,
                 cursor: href && pathname === "/" ? "pointer" : "default",
@@ -631,7 +636,7 @@ export default function CircleBackground() {
                 style={{
                   width: `${size}px`,
                   height: `${size}px`,
-                  borderRadius: "50%",
+                  clipPath: "ellipse(50% 50.625% at center)",
                   overflow: "hidden",
                   ["--initial-rotation" as string]: `${initialRotation}deg`,
                 }}
