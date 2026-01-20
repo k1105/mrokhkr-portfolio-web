@@ -51,6 +51,15 @@ const HREF_TO_IMAGE: Record<string, string> = {
   "/works": "/nav/nav_works.svg",
 };
 
+// 個別ページでも背景色を返すための関数
+const getBackgroundColorForPath = (pathname: string): string | null => {
+  // /works/* のようなパスでも黄色の背景を返す
+  if (pathname.startsWith("/works/")) {
+    return "var(--yellow-background)";
+  }
+  return null;
+};
+
 const getBackgroundColor = (imagePath: string | undefined): string => {
   if (!imagePath) return "transparent";
 
@@ -446,9 +455,15 @@ export default function CircleBackground() {
   const activeCircle = isActive ? circles[activeCircleIndex] : null;
   const clickedCircle = clickedNav !== null ? circles[clickedNav] : null;
   const displayCircle = activeCircle || clickedCircle;
+  
+  // 個別ページでも背景色を設定（円は表示しない）
+  const pathBackgroundColor = getBackgroundColorForPath(pathname);
   const displayBackgroundColor = displayCircle?.imagePath
     ? getBackgroundColor(displayCircle.imagePath)
-    : "transparent";
+    : pathBackgroundColor || "transparent";
+  
+  // 個別ページの場合でも背景色を表示する
+  const shouldShowBackground = displayCircle || pathBackgroundColor;
 
   return (
     <div
@@ -456,7 +471,7 @@ export default function CircleBackground() {
       className={styles.container}
       suppressHydrationWarning
     >
-      {displayCircle && (
+      {shouldShowBackground && (
         <div
           className={styles.clipOverlay}
           style={{
@@ -466,12 +481,12 @@ export default function CircleBackground() {
             width: "100vw",
             height: "100vh",
             backgroundColor: displayBackgroundColor,
-            clipPath: getClipPath(displayCircle),
+            clipPath: displayCircle ? getClipPath(displayCircle) : "none",
             zIndex: -1,
             pointerEvents: "none",
           }}
         >
-          {displayCircle.imagePath && (
+          {displayCircle && displayCircle.imagePath && (
             <div
               style={{
                 position: "absolute",
@@ -537,7 +552,10 @@ export default function CircleBackground() {
             ? styles.circleMask
             : styles.circleMaskCounterClockwise;
 
+        // 個別ページ（/works/*など）では円を表示しない
+        const isIndividualPage = pathname.startsWith("/works/") && pathname !== "/works";
         const isHidden =
+          isIndividualPage ||
           (pathname === "/" && clickedNav !== null && clickedNav !== index) ||
           (isActive && activeCircleIndex !== index);
 

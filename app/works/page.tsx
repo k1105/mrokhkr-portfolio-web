@@ -1,68 +1,45 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import HeaderImage from "../components/HeaderImage";
+import { getWorks } from "../../lib/notion";
 import styles from "./page.module.css";
 
-export default function WorksPage() {
+export default async function WorksPage() {
+  const works = await getWorks();
+
   return (
     <div className={styles.container}>
-      <HeaderImage src="/header/header_works.svg" alt="Works Header" />
       <div className={styles.content}>
         <section className={styles.section}>
           <div className={styles.imageGrid}>
-            <Link
-              href="/works/visualizing-the-covid-19-pandemic"
-              className={styles.imageItem}
-            >
-              <div className={styles.imageWrapper}>
-                <Image
-                  src="/works/works_thumbnail_0.png"
-                  alt="Visualizing the COVID-19 pandemic"
-                  width={1200}
-                  height={800}
-                  className={styles.image}
-                />
-              </div>
-              <div className={styles.textContent}>
-                <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</p>
-              </div>
-            </Link>
-            <Link
-              href="/works/visualizing-the-covid-19-pandemic"
-              className={styles.imageItem}
-            >
-              <div className={styles.imageWrapper}>
-                <Image
-                  src="/works/works_thumbnail_1.png"
-                  alt="Works"
-                  width={1200}
-                  height={800}
-                  className={styles.image}
-                />
-              </div>
-              <div className={styles.textContent}>
-                <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</p>
-              </div>
-            </Link>
-            <Link
-              href="/works/visualizing-the-covid-19-pandemic"
-              className={styles.imageItem}
-            >
-              <div className={styles.imageWrapper}>
-                <Image
-                  src="/works/works_thumbnail_2.png"
-                  alt="Works"
-                  width={1200}
-                  height={800}
-                  className={styles.image}
-                />
-              </div>
-              <div className={styles.textContent}>
-                <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</p>
-              </div>
-            </Link>
+            {works.map((work) => (
+              <Link
+                key={work.id}
+                href={`/works/${work.slug}`}
+                className={styles.imageItem}
+              >
+                <div className={styles.imageWrapper}>
+                  {work.thumbnail ? (
+                    <Image
+                      src={work.thumbnail}
+                      alt={work.name}
+                      width={1200}
+                      height={800}
+                      className={styles.image}
+                    />
+                  ) : (
+                    <div className={styles.imagePlaceholder}>
+                      No Image
+                    </div>
+                  )}
+                </div>
+                <div className={styles.textContent}>
+                  <p>{work.name}</p>
+                  {work.activity_period && (
+                    <p>{work.activity_period}</p>
+                  )}
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       </div>

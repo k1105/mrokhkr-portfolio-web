@@ -2,6 +2,7 @@
   width: 100%;
   min-height: 100vh;
   position: relative;
+  margin-bottom: 5rem;
 }
 
 .content {
@@ -9,7 +10,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  padding-top: 80vw;
+  padding-top: 15rem;
   display: flex;
   flex-direction: column;
   gap: 48px;
@@ -27,33 +28,22 @@
   }
 }
 
-.section {
+.header {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
-.imageGrid {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
+.title {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-bottom: 1.5rem;
+  color: #500b28;
 }
 
-.imageItem {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.imageItem:hover {
-  opacity: 0.8;
+.subtitle {
+  font-size: 0.7rem;
+  line-height: 2;
+  margin-bottom: 0;
+  color: #500b28;
 }
 
 .imageWrapper {
@@ -63,21 +53,10 @@
   align-items: center;
 }
 
-.image {
+.mainImage {
   width: 100%;
   height: auto;
   object-fit: contain;
-}
-
-.imagePlaceholder {
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f0f0;
-  color: #999;
-  font-size: 14px;
 }
 
 .textContent {
@@ -92,7 +71,32 @@
 
 .textContent p {
   font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.contentImageWrapper {
+  width: 100%;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contentImage {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.imageCaption {
+  font-size: 14px;
+  color: #500b28;
   margin-bottom: 0;
+}
+
+.divider {
+  height: 5rem;
+  width: 100%;
 }
 
 /* PC版のスタイル */
@@ -105,33 +109,29 @@
     z-index: 0;
   }
 
-  .section {
-    gap: 32px;
+  .header {
+    text-align: left;
   }
 
-  .imageGrid {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 32px;
-    justify-content: flex-start;
-    align-items: flex-start;
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
-  .imageItem {
-    flex: 0 0 calc(50% - 16px);
-    max-width: calc(50% - 16px);
-    gap: 16px;
+
+  .subtitle {
+    font-size: 0.8rem;
   }
 
   .imageWrapper {
     width: 100%;
   }
 
-  .image {
+  .mainImage {
     max-width: 100%;
   }
 
   .textContent {
-    max-width: 100%;
+    max-width: 800px;
   }
 }
