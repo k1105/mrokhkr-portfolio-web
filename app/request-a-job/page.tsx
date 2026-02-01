@@ -1,15 +1,10 @@
 "use client";
 
-import HeaderImage from "../components/HeaderImage";
 import styles from "./page.module.css";
 
 export default function RequestAJobPage() {
   return (
     <div className={styles.container}>
-      <HeaderImage
-        src="/header/header_request_a_job.svg"
-        alt="Contact Header"
-      />
       <div className={styles.content}>
         <h2 className={styles.formTitle}>仕事をたのんでみる Request a job</h2>
 

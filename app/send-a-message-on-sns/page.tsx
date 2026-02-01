@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import Script from "next/script";
-import HeaderImage from "../components/HeaderImage";
 import styles from "./page.module.css";
 
 // TypeScriptの型定義
@@ -45,10 +44,6 @@ export default function SendAMessageOnSNSPage() {
         }}
       />
 
-      <HeaderImage
-        src="/header/header_about.svg"
-        alt="Send a message on SNS Header"
-      />
 
       <div className={styles.content}>
         <div className={styles.snsContainer}>

@@ -385,6 +385,8 @@ export default function CircleBackground() {
 
     const startTime = Date.now();
     const duration = 1600;
+    const transitionThreshold = 0.85; // 85%の時点でページ遷移を開始
+    let hasNavigated = false; // 遷移が実行されたかどうかのフラグ
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -393,10 +395,15 @@ export default function CircleBackground() {
 
       setClipProgress(eased);
 
+      // 85%の時点でページ遷移を開始（円が開ききる前に遷移）
+      if (progress >= transitionThreshold && !hasNavigated) {
+        hasNavigated = true;
+        router.push(href);
+      }
+
+      // アニメーションを継続して100%まで開く
       if (progress < 1) {
         clipAnimationRef.current = requestAnimationFrame(animate);
-      } else {
-        router.push(href);
       }
     };
 

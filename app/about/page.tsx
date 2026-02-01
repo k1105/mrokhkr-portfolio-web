@@ -1,13 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import HeaderImage from "../components/HeaderImage";
 import styles from "./page.module.css";
 
 export default function About() {
   return (
     <div className={styles.container}>
-      <HeaderImage src="/header/header_about.svg" alt="About Header" />
       <div className={styles.content}>
         <div className={styles.profileImageWrapper}>
           <Image

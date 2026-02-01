@@ -3,8 +3,8 @@ import {Geist, Geist_Mono} from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 import styles from "./layout.module.css";
-import HamburgerMenu from "./components/HamburgerMenu";
 import CircleBackground from "./components/CircleBackground";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "村岡 光 - Portfolio",
-  description: "村岡 光さんのポートフォリオサイト",
+  description: "村岡 光のポートフォリオサイト",
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {/* 左上: title_en.svg */}
-        <div className={styles.headerTopLeft}>
+        <Link href="/" className={styles.headerTopLeft}>
           <Image
             src="/title_en.svg"
             alt="Title English"
@@ -41,10 +41,10 @@ export default function RootLayout({
             height={50}
             priority
           />
-        </div>
+        </Link>
 
         {/* 右上: title.svg */}
-        <div className={styles.headerTopRight}>
+        <Link href="/" className={styles.headerTopRight}>
           <Image
             src="/title.svg"
             alt="Title"
@@ -52,10 +52,7 @@ export default function RootLayout({
             height={200}
             priority
           />
-        </div>
-
-        {/* 左下: ハンバーガーメニュー */}
-        <HamburgerMenu />
+        </Link>
 
         {/* 円の背景 */}
         <CircleBackground />

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-// import HeaderImage from "../components/HeaderImage";
 import styles from "./page.module.css";
 
 export default function MediaArchivePage() {
