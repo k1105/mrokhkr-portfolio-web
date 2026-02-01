@@ -88,8 +88,8 @@ export default async function WorkPage({ params }: WorkPageProps) {
             <Image
               src={work.thumbnail}
               alt={work.name}
-              width={1200}
-              height={800}
+              width={600}
+              height={400}
               className={styles.mainImage}
               priority
             />
@@ -108,8 +108,8 @@ export default async function WorkPage({ params }: WorkPageProps) {
                   <Image
                     src={block.url}
                     alt={block.caption || ""}
-                    width={1200}
-                    height={800}
+                    width={600}
+                    height={400}
                     className={styles.contentImage}
                   />
                   {block.caption && (
