@@ -86,8 +86,8 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
                     <Image
                       src={work.thumbnail}
                       alt={work.name}
-                      width={1200}
-                      height={800}
+                      width={600}
+                      height={400}
                       className={styles.image}
                     />
                   ) : (
