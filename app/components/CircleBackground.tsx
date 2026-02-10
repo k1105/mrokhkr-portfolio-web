@@ -57,6 +57,10 @@ const getBackgroundColorForPath = (pathname: string): string | null => {
   if (pathname.startsWith("/works/")) {
     return "var(--yellow-background)";
   }
+  // /diary, /diary/* も黄色の背景を返す
+  if (pathname === "/diary" || pathname.startsWith("/diary/")) {
+    return "var(--yellow-background)";
+  }
   return null;
 };
 
@@ -560,7 +564,10 @@ export default function CircleBackground() {
             : styles.circleMaskCounterClockwise;
 
         // 個別ページ（/works/*など）では円を表示しない
-        const isIndividualPage = pathname.startsWith("/works/") && pathname !== "/works";
+        const isIndividualPage =
+          (pathname.startsWith("/works/") && pathname !== "/works") ||
+          pathname === "/diary" ||
+          pathname.startsWith("/diary/");
         const isHidden =
           isIndividualPage ||
           (pathname === "/" && clickedNav !== null && clickedNav !== index) ||

@@ -1,35 +1,33 @@
 import Image from "next/image";
-import styles from "./page.module.css";
+import styles from "../media-archive/page.module.css";
 import Link from "next/link";
-import {getMediaArchives} from "@/lib/notion";
+import {getDiaries} from "@/lib/notion";
 
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split("-");
   return `${year}.${month}.${day}`;
 }
 
-export default async function MediaArchivePage() {
-  const archives = await getMediaArchives();
+export default async function DiaryPage() {
+  const diaries = await getDiaries();
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <section className={styles.section}>
           <div className={styles.imageGrid}>
-            {archives.length === 0 && <p>現在、メディア掲載情報はありません。</p>}
-            {archives.map((archive) => (
+            {diaries.length === 0 && <p>現在、日記はありません。</p>}
+            {diaries.map((diary) => (
               <Link
-                key={archive.id}
-                href={archive.url ?? "#"}
-                target={archive.url ? "_blank" : undefined}
-                rel={archive.url ? "noopener noreferrer" : undefined}
+                key={diary.id}
+                href={`/diary/${diary.slug}`}
                 className={styles.imageItem}
               >
                 <div className={styles.imageWrapper}>
-                  {archive.thumbnail ? (
+                  {diary.thumbnail ? (
                     <Image
-                      src={archive.thumbnail}
-                      alt={archive.title}
+                      src={diary.thumbnail}
+                      alt={diary.title}
                       width={400}
                       height={600}
                       className={styles.image}
@@ -39,9 +37,9 @@ export default async function MediaArchivePage() {
                   )}
                 </div>
                 <div className={styles.textContent}>
-                  <p>{archive.title}</p>
-                  {archive.date && (
-                    <p className={styles.date}>{formatDate(archive.date)}</p>
+                  <p>{diary.title}</p>
+                  {diary.date && (
+                    <p className={styles.date}>{formatDate(diary.date)}</p>
                   )}
                 </div>
               </Link>

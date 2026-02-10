@@ -66,9 +66,13 @@
   font-size: 14px;
   line-height: 1.8;
   color: #500b28;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  word-break: break-word;
+  display: flex;
+  justify-content: space-between;
+}
+
+.date {
+  width: 12rem;
+  text-align: right;
 }
 
 .textContent p {
