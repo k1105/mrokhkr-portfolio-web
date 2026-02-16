@@ -1,18 +1,19 @@
 import type {Metadata} from "next";
-import {Geist, Geist_Mono} from "next/font/google";
+import {Inter, Zen_Kaku_Gothic_New} from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 import styles from "./layout.module.css";
 import CircleBackground from "./components/CircleBackground";
 import Link from "next/link";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const zenKakuGothicNew = Zen_Kaku_Gothic_New({
+  variable: "--font-zen-kaku",
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
 });
 
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable}`}
+        className={`${inter.variable} ${zenKakuGothicNew.variable}`}
         suppressHydrationWarning
       >
         {/* 左上: title_en.svg */}

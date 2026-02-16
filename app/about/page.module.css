@@ -18,6 +18,12 @@
   animation-delay: 0.3s;
 }
 
+.divider {
+  border: 0.5px solid #500b28;
+  width: 100%;
+  margin: 2rem 0;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import {useEffect, useState, useRef} from "react";
+import {useEffect, useLayoutEffect, useState, useRef} from "react";
 import {usePathname, useRouter} from "next/navigation";
 import styles from "./CircleBackground.module.css";
 
@@ -53,11 +53,9 @@ const HREF_TO_IMAGE: Record<string, string> = {
 
 // 個別ページでも背景色を返すための関数
 const getBackgroundColorForPath = (pathname: string): string | null => {
-  // /works/* のようなパスでも黄色の背景を返す
   if (pathname.startsWith("/works/")) {
     return "var(--yellow-background)";
   }
-  // /diary, /diary/* も黄色の背景を返す
   if (pathname === "/diary" || pathname.startsWith("/diary/")) {
     return "var(--yellow-background)";
   }
@@ -95,9 +93,11 @@ export default function CircleBackground() {
   const [circleScales, setCircleScales] = useState<number[]>([]);
   const [clickedNav, setClickedNav] = useState<number | null>(null);
   const [clipProgress, setClipProgress] = useState(0);
+  const [gradientVisible, setGradientVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const navigatedViaCircleRef = useRef(false);
   const clipAnimationRef = useRef<number | null>(null);
   const circlesRef = useRef<Circle[]>([]);
   const isInitializedRef = useRef(false);
@@ -373,6 +373,27 @@ export default function CircleBackground() {
     }
   }, [pathname, isActive, clickedNav]);
 
+  // グラデーション表示制御
+  // 直接ロード時: paint前に即表示（transition不要）
+  useLayoutEffect(() => {
+    if (pathname === "/") {
+      setGradientVisible(false);
+      return;
+    }
+    if (!navigatedViaCircleRef.current) {
+      setGradientVisible(true);
+    }
+  }, [pathname]);
+
+  // サークルクリック遷移時: paint後に表示（transitionが発動）
+  useEffect(() => {
+    if (pathname === "/" || !navigatedViaCircleRef.current) return;
+    navigatedViaCircleRef.current = false;
+    requestAnimationFrame(() => {
+      setGradientVisible(true);
+    });
+  }, [pathname]);
+
   // クリック遷移アニメーション
   useEffect(() => {
     if (pathname !== "/" || clickedNav === null) return;
@@ -423,7 +444,7 @@ export default function CircleBackground() {
   const handleNavClick = (
     e: React.MouseEvent,
     circle: Circle,
-    index: number
+    index: number,
   ) => {
     if (pathname !== "/") return;
     e.preventDefault();
@@ -431,6 +452,8 @@ export default function CircleBackground() {
     const href = circle.imagePath ? IMAGE_TO_HREF[circle.imagePath] : null;
     if (!href || !circle.imagePath) return;
 
+    navigatedViaCircleRef.current = true;
+    setGradientVisible(false);
     setClickedNav(index);
     setClipProgress(0);
   };
@@ -453,7 +476,7 @@ export default function CircleBackground() {
     const startRadiusX = radiusX;
     const startRadiusY = radiusY;
     const maxRadius = Math.sqrt(
-      window.innerWidth ** 2 + window.innerHeight ** 2
+      window.innerWidth ** 2 + window.innerHeight ** 2,
     );
     const currentRadiusX =
       startRadiusX + (maxRadius - startRadiusX) * clipProgress;
@@ -466,14 +489,12 @@ export default function CircleBackground() {
   const activeCircle = isActive ? circles[activeCircleIndex] : null;
   const clickedCircle = clickedNav !== null ? circles[clickedNav] : null;
   const displayCircle = activeCircle || clickedCircle;
-  
-  // 個別ページでも背景色を設定（円は表示しない）
+
   const pathBackgroundColor = getBackgroundColorForPath(pathname);
   const displayBackgroundColor = displayCircle?.imagePath
     ? getBackgroundColor(displayCircle.imagePath)
     : pathBackgroundColor || "transparent";
-  
-  // 個別ページの場合でも背景色を表示する
+
   const shouldShowBackground = displayCircle || pathBackgroundColor;
 
   return (
@@ -483,62 +504,80 @@ export default function CircleBackground() {
       suppressHydrationWarning
     >
       {shouldShowBackground && (
-        <div
-          className={styles.clipOverlay}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: displayBackgroundColor,
-            clipPath: displayCircle ? getClipPath(displayCircle) : "none",
-            zIndex: -1,
-            pointerEvents: "none",
-          }}
-        >
-          {displayCircle && displayCircle.imagePath && (
-            <div
-              style={{
-                position: "absolute",
-                left: `${displayCircle.x}px`,
-                top: `${displayCircle.y}px`,
-                transform: "translate(-50%, -50%)",
-                width: `${displayCircle.r * 2 * 0.95}px`,
-                height: `${displayCircle.r * 2 * 0.95}px`,
-              }}
-            >
+        <>
+          {/* 単色レイヤー: 円の展開アニメーション中に表示 */}
+          <div
+            className={styles.clipOverlay}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              backgroundColor: displayBackgroundColor,
+              clipPath: displayCircle ? getClipPath(displayCircle) : "none",
+              zIndex: -1,
+              pointerEvents: "none",
+            }}
+          >
+            {displayCircle && displayCircle.imagePath && !gradientVisible && (
               <div
-                className={
-                  displayCircle.rotationDirection === "clockwise"
-                    ? styles.circleMask
-                    : styles.circleMaskCounterClockwise
-                }
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  clipPath: "ellipse(50% 50.625% at center)",
-                  overflow: "hidden",
-                  ["--initial-rotation" as string]: `${
-                    displayCircle.initialRotation || 0
-                  }deg`,
+                  position: "absolute",
+                  left: `${displayCircle.x}px`,
+                  top: `${displayCircle.y}px`,
+                  transform: "translate(-50%, -50%)",
+                  width: `${displayCircle.r * 2 * 0.95}px`,
+                  height: `${displayCircle.r * 2 * 0.95}px`,
                 }}
               >
-                <Image
-                  src={displayCircle.imagePath}
-                  alt=""
-                  width={displayCircle.r * 2 * 0.95}
-                  height={displayCircle.r * 2 * 0.95}
+                <div
+                  className={
+                    displayCircle.rotationDirection === "clockwise"
+                      ? styles.circleMask
+                      : styles.circleMaskCounterClockwise
+                  }
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
+                    clipPath: "ellipse(50% 50.625% at center)",
+                    overflow: "hidden",
+                    ["--initial-rotation" as string]: `${
+                      displayCircle.initialRotation || 0
+                    }deg`,
                   }}
-                />
+                >
+                  <Image
+                    src={displayCircle.imagePath}
+                    alt=""
+                    width={displayCircle.r * 2 * 0.95}
+                    height={displayCircle.r * 2 * 0.95}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+          {/* グラデーションレイヤー: 展開完了後にフェードイン */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: `linear-gradient(${displayBackgroundColor}, #ffffff) no-repeat fixed`,
+              opacity: gradientVisible ? 1 : 0,
+              transition: "opacity 0.4s ease-out",
+              zIndex: -1,
+              pointerEvents: "none",
+            }}
+          />
+        </>
       )}
 
       {circles.map((circle, index) => {
@@ -589,7 +628,7 @@ export default function CircleBackground() {
                   width: `${size}px`,
                   height: `${size}px`,
                   clipPath: "ellipse(50% 50.625% at center)",
-                  backgroundColor: "#888",
+                  backgroundColor: gradientVisible ? "transparent" : "#888",
                   ["--initial-rotation" as string]: `${initialRotation}deg`,
                 }}
               />
@@ -609,7 +648,9 @@ export default function CircleBackground() {
                 height: `${size}px`,
                 clipPath: "ellipse(50% 50.625% at center)",
                 overflow: "hidden",
-                backgroundColor: backgroundColor,
+                backgroundColor: gradientVisible
+                  ? "transparent"
+                  : backgroundColor,
                 cursor: href && pathname === "/" ? "pointer" : "default",
                 opacity: isHidden ? 0 : 1,
                 transition: "opacity 0.2s",
