@@ -18,9 +18,15 @@ const zenKakuGothicNew = Zen_Kaku_Gothic_New({
   subsets: ["latin"],
 });
 
+import type {Viewport} from "next";
+
 export const metadata: Metadata = {
   title: "村岡 光 - Portfolio",
   description: "村岡 光のポートフォリオサイト",
+};
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
