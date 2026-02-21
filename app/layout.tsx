@@ -4,6 +4,7 @@ import Image from "next/image";
 import "./globals.css";
 import styles from "./layout.module.css";
 import CircleBackground from "./components/CircleBackground";
+import BackButton from "./components/BackButton";
 import Link from "next/link";
 
 const inter = Inter({
@@ -57,6 +58,9 @@ export default function RootLayout({
 
         {/* 円の背景 */}
         <CircleBackground />
+
+        {/* 左下: 上の階層へ戻るボタン */}
+        <BackButton />
 
         {children}
       </body>
