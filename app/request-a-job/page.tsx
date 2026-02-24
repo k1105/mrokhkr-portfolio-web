@@ -1,14 +1,69 @@
 "use client";
 
+import { FormEvent, useState } from "react";
 import styles from "./page.module.css";
 
 export default function RequestAJobPage() {
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus("sending");
+    setErrorMessage("");
+
+    const formData = new FormData(e.currentTarget);
+    const body = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      workType: formData.get("workType"),
+      inquiry: formData.get("inquiry"),
+    };
+
+    try {
+      const res = await fetch("/api/send-job-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "送信に失敗しました");
+      }
+
+      setStatus("success");
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage(
+        err instanceof Error ? err.message : "送信に失敗しました"
+      );
+    }
+  }
+
+  if (status === "success") {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <h2 className={styles.formTitle}>送信完了</h2>
+          <p>お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <h2 className={styles.formTitle}>仕事をたのんでみる Request a job</h2>
 
-        <form className={styles.form}>
+        {status === "error" && (
+          <p className={styles.error}>{errorMessage}</p>
+        )}
+
+        <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="name" className={styles.label}>
               お名前
@@ -61,8 +116,12 @@ export default function RequestAJobPage() {
             />
           </div>
 
-          <button type="submit" className={styles.submitButton}>
-            送信
+          <button
+            type="submit"
+            className={styles.submitButton}
+            disabled={status === "sending"}
+          >
+            {status === "sending" ? "送信中..." : "送信"}
           </button>
         </form>
       </div>
