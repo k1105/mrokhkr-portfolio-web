@@ -4,10 +4,12 @@ import Image from "next/image";
 import "./globals.css";
 import styles from "./layout.module.css";
 import CircleBackground from "./components/CircleBackground";
+import type {WorkThumbnail} from "./components/CircleBackground";
 import BackButton from "./components/BackButton";
 import Footer from "./components/Footer";
 import GridOverlay from "./components/GridOverlay";
 import Link from "next/link";
+import {getWorks} from "../lib/notion";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,11 +33,20 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // ビルド時にworksを取得し、サムネイル付きのものから8件ランダムピック
+  const works = await getWorks();
+  const worksWithThumbnails = works.filter((w) => w.thumbnail);
+  const shuffled = [...worksWithThumbnails].sort(() => Math.random() - 0.5);
+  const workThumbnails: WorkThumbnail[] = shuffled.slice(0, 8).map((w) => ({
+    slug: w.slug,
+    thumbnail: w.thumbnail!,
+  }));
+
   return (
     <html lang="ja">
       <body
@@ -65,7 +76,7 @@ export default function RootLayout({
         </Link>
 
         {/* 円の背景 */}
-        <CircleBackground />
+        <CircleBackground workThumbnails={workThumbnails} />
 
         {/* 左下: 上の階層へ戻るボタン */}
         <BackButton />

@@ -5,6 +5,11 @@ import {useEffect, useLayoutEffect, useState, useRef} from "react";
 import {usePathname, useRouter} from "next/navigation";
 import styles from "./CircleBackground.module.css";
 
+export interface WorkThumbnail {
+  slug: string;
+  thumbnail: string;
+}
+
 interface Circle {
   x: number;
   y: number;
@@ -13,6 +18,7 @@ interface Circle {
   isSpecial: boolean;
   imageIndex?: number;
   imagePath?: string;
+  workSlug?: string;
   initialRotation?: number;
   rotationDirection?: "clockwise" | "counterclockwise";
   // アニメーション用の個体差パラメータを追加
@@ -95,7 +101,11 @@ const getBackgroundColor = (imagePath: string | undefined): string => {
   return "transparent";
 };
 
-export default function CircleBackground() {
+interface CircleBackgroundProps {
+  workThumbnails?: WorkThumbnail[];
+}
+
+export default function CircleBackground({ workThumbnails = [] }: CircleBackgroundProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -236,7 +246,8 @@ export default function CircleBackground() {
         });
       }
 
-      for (let i = 0; i < NUM_SMALL_NORMAL; i++) {
+      const thumbCount = Math.min(NUM_SMALL_NORMAL, workThumbnails.length);
+      for (let i = 0; i < thumbCount; i++) {
         circles.push({
           x: (Math.random() - 0.5) * 2,
           y: (Math.random() - 0.5) * 2,
@@ -244,6 +255,8 @@ export default function CircleBackground() {
           type: "small",
           isSpecial: false,
           imageIndex: i,
+          imagePath: workThumbnails[i].thumbnail,
+          workSlug: workThumbnails[i].slug,
         });
       }
 
@@ -738,6 +751,10 @@ export default function CircleBackground() {
             </div>
           );
         } else {
+          const workHref = circle.workSlug
+            ? `/works/${circle.workSlug}`
+            : null;
+
           return (
             <div
               key={`small-${index}`}
@@ -745,7 +762,14 @@ export default function CircleBackground() {
                 ...wrapperStyle,
                 opacity: isHidden ? 0 : 1,
                 transition: "opacity 0.2s",
+                cursor: workHref && pathname === "/" ? "pointer" : "default",
+                pointerEvents: pathname === "/" ? "auto" : "none",
               }}
+              onClick={
+                workHref
+                  ? () => router.push(workHref)
+                  : undefined
+              }
             >
               <div
                 className={rotationClass}
@@ -757,17 +781,19 @@ export default function CircleBackground() {
                   ["--initial-rotation" as string]: `${initialRotation}deg`,
                 }}
               >
-                <Image
-                  src={`/nav/nav_works_${circle.imageIndex}.png`}
-                  alt=""
-                  width={size}
-                  height={size}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
+                {circle.imagePath && (
+                  <Image
+                    src={circle.imagePath}
+                    alt=""
+                    width={size}
+                    height={size}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
               </div>
             </div>
           );
