@@ -92,13 +92,22 @@ export default function RequestAJobPage() {
             <label htmlFor="workType" className={styles.label}>
               お仕事の種類
             </label>
-            <input
-              type="text"
+            <select
               id="workType"
               name="workType"
-              className={styles.input}
+              className={styles.select}
               required
-            />
+              defaultValue=""
+            >
+              <option value="" disabled>
+                選択してください
+              </option>
+              <option value="デザインを依頼したい">デザインを依頼したい</option>
+              <option value="作品や活動のことについて聞きたい">
+                作品や活動のことについて聞きたい
+              </option>
+              <option value="その他のご相談">その他のご相談</option>
+            </select>
           </div>
 
           <div className={styles.formGroup}>

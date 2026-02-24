@@ -30,8 +30,7 @@ export default async function MediaArchivePage() {
                     <Image
                       src={archive.thumbnail}
                       alt={archive.title}
-                      width={400}
-                      height={600}
+                      fill
                       className={styles.image}
                     />
                   ) : (
