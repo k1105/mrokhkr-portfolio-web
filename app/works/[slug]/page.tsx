@@ -1,16 +1,16 @@
 import Image from "next/image";
 import React from "react";
-import { notFound } from "next/navigation";
+import {notFound} from "next/navigation";
 import {
   getWorkBySlug,
   getWorks,
   getWorkContent,
-    NotionRichTextContent,
+  NotionRichTextContent,
 } from "../../../lib/notion";
 import styles from "./page.module.css";
 
 interface WorkPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{slug: string}>;
 }
 
 export async function generateStaticParams() {
@@ -22,7 +22,7 @@ export async function generateStaticParams() {
 
 function renderRichText(richText: NotionRichTextContent[]) {
   return richText.map((item, index) => {
-    const { plain_text, href, annotations } = item;
+    const {plain_text, href, annotations} = item;
     let content: React.ReactNode = plain_text;
 
     if (annotations) {
@@ -46,12 +46,7 @@ function renderRichText(richText: NotionRichTextContent[]) {
 
     if (href) {
       return (
-        <a
-          key={index}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a key={index} href={href} target="_blank" rel="noopener noreferrer">
           {content}
         </a>
       );
@@ -61,8 +56,8 @@ function renderRichText(richText: NotionRichTextContent[]) {
   });
 }
 
-export default async function WorkPage({ params }: WorkPageProps) {
-  const { slug } = await params;
+export default async function WorkPage({params}: WorkPageProps) {
+  const {slug} = await params;
   const work = await getWorkBySlug(slug);
 
   if (!work) {
@@ -77,9 +72,12 @@ export default async function WorkPage({ params }: WorkPageProps) {
         <div className={styles.header}>
           <h1 className={styles.title}>{work.name}</h1>
           <p className={styles.subtitle}>
-            {work.category}
-            <br />
-            {work.activity_period && `${work.activity_period}`}
+            <span className={styles.category}>{work.category}</span>
+            {work.activity_period && (
+              <span className={styles.activityPeriod}>
+                {work.activity_period}
+              </span>
+            )}
           </p>
         </div>
 
@@ -99,9 +97,7 @@ export default async function WorkPage({ params }: WorkPageProps) {
         <div className={styles.textContent}>
           {content.map((block, index) => {
             if (block.type === "text") {
-              return (
-                <p key={index}>{renderRichText(block.rich_text)}</p>
-              );
+              return <p key={index}>{renderRichText(block.rich_text)}</p>;
             } else if (block.type === "image") {
               return (
                 <div key={index} className={styles.contentImageWrapper}>
@@ -118,9 +114,7 @@ export default async function WorkPage({ params }: WorkPageProps) {
                 </div>
               );
             } else if (block.type === "divider") {
-              return (
-                <div key={index} className={styles.divider} />
-              );
+              return <div key={index} className={styles.divider} />;
             }
             return null;
           })}

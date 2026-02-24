@@ -1,6 +1,6 @@
 .container {
   width: 100%;
-  min-height: 100dvh;
+  min-height: 100svh;
   position: relative;
   margin-bottom: 5rem;
 }
@@ -43,6 +43,8 @@
   line-height: 2;
   margin-bottom: 0;
   color: #500b28;
+  display: flex;
+  justify-content: space-between;
 }
 
 .imageWrapper {

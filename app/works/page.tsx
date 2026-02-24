@@ -1,16 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getWorks } from "../../lib/notion";
+import {getWorks} from "../../lib/notion";
 import styles from "./page.module.css";
-
-interface WorksPageProps {
-  searchParams: Promise<{ category?: string }>;
-}
+import FadeText from "./FadeText";
 
 interface CategoryInfo {
-  param: string; // クエリパラメータ用（英語）
-  display: string; // 表示用（日本語 + 英語）
-  search: string; // 検索用（日本語のみ）
+  param: string;
+  display: string;
+  search: string;
 }
 
 const CATEGORIES: CategoryInfo[] = [
@@ -36,76 +33,49 @@ const CATEGORIES: CategoryInfo[] = [
   },
 ];
 
-export default async function WorksPage({ searchParams }: WorksPageProps) {
-  const params = await searchParams;
-  // クエリパラメータがない場合、デフォルトで「伝えるものをつくる」を選択
-  const selectedCategoryParam = params.category || "visual-communication";
+export default async function WorksPage() {
   const works = await getWorks();
-  
-  // クエリパラメータから日本語カテゴリ名を取得
-  const selectedCategoryInfo = CATEGORIES.find(
-    (cat) => cat.param === selectedCategoryParam
-  ) || CATEGORIES[0]; // 見つからない場合もデフォルトで最初のカテゴリを使用
-  const searchCategory = selectedCategoryInfo.search;
-  
-  // カテゴリでフィルタリング（日本語カテゴリ名で検索）
-  const filteredWorks = works.filter(
-    (work) => work.category === searchCategory
-  );
+
+  // カテゴリごとにグルーピング
+  const worksByCategory = CATEGORIES.map((category) => ({
+    category,
+    works: works.filter((work) => work.category === category.search),
+  }));
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        {CATEGORIES.map((category) => {
-          const isActive = selectedCategoryParam === category.param;
-          const href = isActive
-            ? "/works"
-            : `/works?category=${category.param}`;
-          return (
-            <Link
-              key={category.param}
-              href={href}
-              className={isActive ? styles.active : styles.inactive}
-            >
-              {category.display}
-            </Link>
-          );
-        })}
-      </div>
       <div className={styles.content}>
-        <section className={styles.section}>
-          <div className={styles.imageGrid}>
-            {filteredWorks.map((work) => (
-              <Link
-                key={work.id}
-                href={`/works/${work.slug}`}
-                className={styles.imageItem}
-              >
-                <div className={styles.imageWrapper}>
-                  {work.thumbnail ? (
-                    <Image
-                      src={work.thumbnail}
-                      alt={work.name}
-                      width={600}
-                      height={400}
-                      className={styles.image}
-                    />
-                  ) : (
-                    <div className={styles.imagePlaceholder}>
-                      No Image
-                    </div>
-                  )}
-                </div>
-                <div className={styles.textContent}>
-                  <p>{work.name}</p>
-                  {work.activity_period && (
-                    <p>{work.activity_period}</p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {worksByCategory.map(({category, works: categoryWorks}) => (
+          <section key={category.param} className={styles.section}>
+            <h2 className={styles.categoryTitle}>{category.display}</h2>
+            <div className={styles.carousel}>
+              {categoryWorks.map((work) => (
+                <Link
+                  key={work.id}
+                  href={`/works/${work.slug}`}
+                  className={styles.imageItem}
+                >
+                  <div className={styles.imageWrapper}>
+                    {work.thumbnail ? (
+                      <Image
+                        src={work.thumbnail}
+                        alt={work.name}
+                        width={600}
+                        height={400}
+                        className={styles.image}
+                      />
+                    ) : (
+                      <div className={styles.imagePlaceholder}>No Image</div>
+                    )}
+                  </div>
+                  <FadeText>
+                    <p>{work.name}</p>
+                  </FadeText>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );
