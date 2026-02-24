@@ -4,6 +4,7 @@
   --yellow-background: #ffffb9;
   --purple-background: #f1ebfa;
   --primary-color: #500b28;
+  --link-color: #9682c8;
   --grid-cell: 10vw;
 }
 
@@ -35,6 +36,6 @@ body:has([data-page="home"]) {
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+  color: var(--link-color);
+  text-decoration: underline;
 }

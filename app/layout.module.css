@@ -3,6 +3,8 @@
   top: var(--grid-cell);
   left: calc(var(--grid-cell) - 1rem);
   z-index: 1000;
+  color: inherit;
+  text-decoration: none;
 }
 
 .headerTopRight {
@@ -10,6 +12,8 @@
   top: var(--grid-cell);
   left: calc(var(--grid-cell) * 9);
   z-index: 1000;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* sp版（スマートフォン）のスタイル */

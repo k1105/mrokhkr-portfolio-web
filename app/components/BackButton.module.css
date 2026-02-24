@@ -7,6 +7,7 @@
   width: 48px;
   height: 48px;
   transition: opacity 0.2s ease;
+  text-decoration: none;
 }
 
 .backButton:hover {
