@@ -51,6 +51,16 @@ const HREF_TO_IMAGE: Record<string, string> = {
   "/works": "/nav/nav_works.svg",
 };
 
+const SPECIAL_CIRCLE_IMAGES = [
+  "/nav/nav_x.svg",
+  "/nav/nav_instagram.svg",
+];
+
+const SPECIAL_EXTERNAL_LINKS: Record<string, string> = {
+  "/nav/nav_x.svg": "https://x.com/mrhkokr",
+  "/nav/nav_instagram.svg": "https://www.instagram.com/murahikaokaru/",
+};
+
 // 個別ページでも背景色を返すための関数
 const getBackgroundColorForPath = (pathname: string): string | null => {
   if (pathname.startsWith("/works/")) {
@@ -244,6 +254,7 @@ export default function CircleBackground() {
           r: baseR * SIZE_RATIO,
           type: "small",
           isSpecial: true,
+          imagePath: SPECIAL_CIRCLE_IMAGES[i],
         });
       }
 
@@ -613,6 +624,41 @@ export default function CircleBackground() {
           (isActive && activeCircleIndex !== index);
 
         if (circle.isSpecial) {
+          const externalHref = circle.imagePath
+            ? SPECIAL_EXTERNAL_LINKS[circle.imagePath]
+            : null;
+
+          const specialContent = (
+            <div
+              className={rotationClass}
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                clipPath: "ellipse(50% 50.625% at center)",
+                overflow: "hidden",
+                backgroundColor: gradientVisible
+                  ? "transparent"
+                  : "var(--purple-background)",
+                cursor: externalHref && pathname === "/" ? "pointer" : "default",
+                ["--initial-rotation" as string]: `${initialRotation}deg`,
+              }}
+            >
+              {circle.imagePath && (
+                <Image
+                  src={circle.imagePath}
+                  alt=""
+                  width={size}
+                  height={size}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              )}
+            </div>
+          );
+
           return (
             <div
               key={`special-${index}`}
@@ -620,18 +666,15 @@ export default function CircleBackground() {
                 ...wrapperStyle,
                 opacity: isHidden ? 0 : 1,
                 transition: "opacity 0.2s",
+                pointerEvents: pathname === "/" ? "auto" : "none",
               }}
+              onClick={
+                externalHref
+                  ? () => window.open(externalHref, "_blank", "noopener,noreferrer")
+                  : undefined
+              }
             >
-              <div
-                className={rotationClass}
-                style={{
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  clipPath: "ellipse(50% 50.625% at center)",
-                  backgroundColor: gradientVisible ? "transparent" : "#888",
-                  ["--initial-rotation" as string]: `${initialRotation}deg`,
-                }}
-              />
+              {specialContent}
             </div>
           );
         } else if (circle.type === "large") {

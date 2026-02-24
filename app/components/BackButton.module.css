@@ -1,7 +1,7 @@
 .backButton {
   position: fixed;
-  bottom: 5vh;
-  left: 3vw;
+  bottom: var(--grid-cell);
+  left: var(--grid-cell);
   z-index: 1000;
   display: block;
   width: 48px;
@@ -16,11 +16,4 @@
 .icon {
   width: 100%;
   height: 100%;
-}
-
-@media (max-width: 768px) {
-  .backButton {
-    bottom: 3vh;
-    left: 5vw;
-  }
 }

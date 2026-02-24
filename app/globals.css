@@ -4,6 +4,7 @@
   --yellow-background: #ffffb9;
   --purple-background: #f1ebfa;
   --primary-color: #500b28;
+  --grid-cell: 10vw;
 }
 
 html,
@@ -18,6 +19,9 @@ body {
   font-family: var(--font-inter), var(--font-zen-kaku), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
 body:has([data-page="home"]) {

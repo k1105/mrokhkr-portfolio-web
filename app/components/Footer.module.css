@@ -1,0 +1,14 @@
+.footer {
+  position: relative;
+  z-index: 1;
+  width: calc(var(--grid-cell) * 8);
+  margin: auto auto 0;
+  padding-bottom: var(--grid-cell);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.copyright {
+  font-size: 0.7rem;
+  color: var(--primary-color);
+}

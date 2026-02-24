@@ -5,6 +5,8 @@ import "./globals.css";
 import styles from "./layout.module.css";
 import CircleBackground from "./components/CircleBackground";
 import BackButton from "./components/BackButton";
+import Footer from "./components/Footer";
+import GridOverlay from "./components/GridOverlay";
 import Link from "next/link";
 
 const inter = Inter({
@@ -21,7 +23,7 @@ const zenKakuGothicNew = Zen_Kaku_Gothic_New({
 import type {Viewport} from "next";
 
 export const metadata: Metadata = {
-  title: "村岡 光 - Portfolio",
+  title: "Design Project of Muraoka Hikaru",
   description: "村岡 光のポートフォリオサイト",
 };
 
@@ -69,6 +71,8 @@ export default function RootLayout({
         <BackButton />
 
         {children}
+        <Footer />
+        <GridOverlay />
       </body>
     </html>
   );
