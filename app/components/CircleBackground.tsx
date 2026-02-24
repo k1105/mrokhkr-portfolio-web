@@ -34,7 +34,7 @@ const SIZE_RATIO = 0.7;
 
 const RED_CIRCLE_IMAGES = [
   "/nav/nav_about.svg",
-  "/nav/nav_contact.svg",
+  "/nav/nav_what_im_thinking.svg",
   "/nav/nav_media_archive.svg",
   "/nav/nav_request_a_job.svg",
   "/nav/nav_works.svg",
@@ -42,7 +42,7 @@ const RED_CIRCLE_IMAGES = [
 
 const IMAGE_TO_HREF: Record<string, string> = {
   "/nav/nav_about.svg": "/about",
-  "/nav/nav_contact.svg": "/send-a-message-on-sns",
+  "/nav/nav_what_im_thinking.svg": "/diary",
   "/nav/nav_media_archive.svg": "/media-archive",
   "/nav/nav_request_a_job.svg": "/request-a-job",
   "/nav/nav_works.svg": "/works",
@@ -50,8 +50,8 @@ const IMAGE_TO_HREF: Record<string, string> = {
 
 const HREF_TO_IMAGE: Record<string, string> = {
   "/about": "/nav/nav_about.svg",
-  "/": "/nav/nav_contact.svg",
-  "/send-a-message-on-sns": "/nav/nav_contact.svg",
+  "/": "/nav/nav_what_im_thinking.svg",
+  "/diary": "/nav/nav_what_im_thinking.svg",
   "/media-archive": "/nav/nav_media_archive.svg",
   "/request-a-job": "/nav/nav_request_a_job.svg",
   "/works": "/nav/nav_works.svg",
@@ -73,7 +73,7 @@ const getBackgroundColorForPath = (pathname: string): string | null => {
     return "var(--yellow-background)";
   }
   if (pathname === "/diary" || pathname.startsWith("/diary/")) {
-    return "var(--yellow-background)";
+    return "var(--purple-background)";
   }
   return null;
 };
@@ -88,7 +88,7 @@ const getBackgroundColor = (imagePath: string | undefined): string => {
   ];
 
   const pinkBackgrounds = [
-    "/nav/nav_contact.svg",
+    "/nav/nav_what_im_thinking.svg",
     "/nav/nav_request_a_job.svg",
   ];
 
@@ -629,8 +629,7 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
         // 個別ページ（/works/*など）では円を表示しない
         const isIndividualPage =
           (pathname.startsWith("/works/") && pathname !== "/works") ||
-          pathname === "/diary" ||
-          pathname.startsWith("/diary/");
+          (pathname.startsWith("/diary/") && pathname !== "/diary");
         const isHidden =
           isIndividualPage ||
           (pathname === "/" && clickedNav !== null && clickedNav !== index) ||

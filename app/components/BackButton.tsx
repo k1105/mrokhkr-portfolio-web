@@ -5,7 +5,7 @@ import {usePathname} from "next/navigation";
 import styles from "./BackButton.module.css";
 
 const getIconBackgroundColor = (pathname: string): string => {
-  const purplePages = ["/send-a-message-on-sns", "/request-a-job"];
+  const purplePages = ["/diary", "/request-a-job"];
   if (purplePages.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return "var(--purple-background)";
   }

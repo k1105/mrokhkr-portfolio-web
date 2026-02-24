@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {FormEvent, useState} from "react";
 import styles from "./page.module.css";
 
 export default function RequestAJobPage() {
@@ -25,7 +25,7 @@ export default function RequestAJobPage() {
     try {
       const res = await fetch("/api/send-job-request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(body),
       });
 
@@ -38,7 +38,7 @@ export default function RequestAJobPage() {
     } catch (err) {
       setStatus("error");
       setErrorMessage(
-        err instanceof Error ? err.message : "送信に失敗しました"
+        err instanceof Error ? err.message : "送信に失敗しました",
       );
     }
   }
@@ -48,7 +48,9 @@ export default function RequestAJobPage() {
       <div className={styles.container}>
         <div className={styles.content}>
           <h2 className={styles.formTitle}>送信完了</h2>
-          <p>お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。</p>
+          <p>
+            お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。
+          </p>
         </div>
       </div>
     );
@@ -57,11 +59,7 @@ export default function RequestAJobPage() {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h2 className={styles.formTitle}>仕事をたのんでみる Request a job</h2>
-
-        {status === "error" && (
-          <p className={styles.error}>{errorMessage}</p>
-        )}
+        {status === "error" && <p className={styles.error}>{errorMessage}</p>}
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
