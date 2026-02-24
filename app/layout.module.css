@@ -16,15 +16,25 @@
   text-decoration: none;
 }
 
+.headerTopLeft img {
+  width: 300px !important;
+  height: 20px !important;
+}
+
+.headerTopRight img {
+  width: 20px !important;
+  height: 300px !important;
+}
+
 /* sp版（スマートフォン）のスタイル */
 @media (max-width: 768px) {
   .headerTopLeft img {
-    width: 110px !important;
-    height: 25px !important;
+    width: 200px !important;
+    height: 15px !important;
   }
 
   .headerTopRight img {
-    width: 25px !important;
-    height: 110px !important;
+    width: 15px !important;
+    height: 200px !important;
   }
 }

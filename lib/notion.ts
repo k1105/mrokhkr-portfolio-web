@@ -12,6 +12,7 @@ const diaryDataSourceId = process.env.NOTION_DIARY_DATASOURCE_ID;
 
 export interface NotionWork {
   id: string;
+  sortId: number;
   name: string;
   category: string;
   thumbnail: string | null;
@@ -127,6 +128,11 @@ async function fetchAllWorks(): Promise<NotionWork[]> {
         ? visibilityProperty.checkbox
         : false;
 
+    // Extract id (number) property
+    const idProperty = page.properties.id;
+    const sortId =
+      idProperty?.type === "number" ? (idProperty.number ?? 0) : 0;
+
     // Filter out works that are not visible
     if (!visibility) continue;
 
@@ -135,6 +141,7 @@ async function fetchAllWorks(): Promise<NotionWork[]> {
 
     works.push({
       id: page.id,
+      sortId,
       name,
       category,
       thumbnail: thumbnailUrl,
@@ -143,6 +150,9 @@ async function fetchAllWorks(): Promise<NotionWork[]> {
       slug,
     });
   }
+
+  // id降順でソート
+  works.sort((a, b) => b.sortId - a.sortId);
 
   return works;
 }

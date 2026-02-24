@@ -69,8 +69,8 @@ export default async function RootLayout({
           <Image
             src="/title.svg"
             alt="Title"
-            width={50}
-            height={200}
+            width={20}
+            height={300}
             priority
           />
         </Link>
