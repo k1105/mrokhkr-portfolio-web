@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {usePathname} from "next/navigation";
 import styles from "./BackButton.module.css";
 
@@ -26,8 +25,17 @@ export default function BackButton() {
 
   const bgColor = getIconBackgroundColor(pathname);
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.dispatchEvent(
+      new CustomEvent("page-transition-back", {
+        detail: {href: parentPath, bgColor},
+      }),
+    );
+  };
+
   return (
-    <Link href={parentPath} className={styles.backButton} aria-label="上の階層へ戻る">
+    <a href={parentPath} className={styles.backButton} aria-label="上の階層へ戻る" onClick={handleClick}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 112.5 112.5"
@@ -41,6 +49,6 @@ export default function BackButton() {
           <polyline points="58.39 32.21 58.39 53.83 85.43 26.8" />
         </g>
       </svg>
-    </Link>
+    </a>
   );
 }

@@ -445,6 +445,28 @@ export default function CircleBackground({
     });
   }, [pathname]);
 
+  // アクティブな円の中心をwindow.__transitionCentersに保存（直接ロード時のフォールバック）
+  useEffect(() => {
+    if (!isActive || activeCircleIndex === null) return;
+    const currentCircles = circlesRef.current;
+    if (currentCircles.length === 0 || activeCircleIndex >= currentCircles.length) return;
+    const circle = currentCircles[activeCircleIndex];
+    if (!window.__transitionCenters) window.__transitionCenters = {};
+    window.__transitionCenters[pathname] = {x: circle.x, y: circle.y};
+  }, [isActive, activeCircleIndex, pathname]);
+
+  // page-transition-navigate イベントを受信（詳細ページ遷移時）
+  useEffect(() => {
+    const handleTransitionNavigate = () => {
+      navigatedViaCircleRef.current = true;
+      setGradientVisible(false);
+    };
+    window.addEventListener("page-transition-navigate", handleTransitionNavigate);
+    return () => {
+      window.removeEventListener("page-transition-navigate", handleTransitionNavigate);
+    };
+  }, []);
+
   // クリック遷移アニメーション
   useEffect(() => {
     if (pathname !== "/" || clickedNav === null) return;
@@ -502,6 +524,10 @@ export default function CircleBackground({
     e.stopPropagation();
     const href = circle.imagePath ? IMAGE_TO_HREF[circle.imagePath] : null;
     if (!href || !circle.imagePath) return;
+
+    // Store center for back navigation
+    if (!window.__transitionCenters) window.__transitionCenters = {};
+    window.__transitionCenters[href] = {x: circle.x, y: circle.y};
 
     navigatedViaCircleRef.current = true;
     setGradientVisible(false);

@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import {getWorks} from "../../lib/notion";
 import styles from "./page.module.css";
 import FadeText from "./FadeText";
+import TransitionLink from "../components/TransitionLink";
 
 interface CategoryInfo {
   param: string;
@@ -50,9 +50,10 @@ export default async function WorksPage() {
             <h2 className={styles.categoryTitle}>{category.display}</h2>
             <div className={styles.carousel}>
               {categoryWorks.map((work) => (
-                <Link
+                <TransitionLink
                   key={work.id}
                   href={`/works/${work.slug}`}
+                  bgColor="var(--yellow-background)"
                   className={styles.imageItem}
                 >
                   <div className={styles.imageWrapper}>
@@ -71,7 +72,7 @@ export default async function WorksPage() {
                   <FadeText>
                     <p>{work.name}</p>
                   </FadeText>
-                </Link>
+                </TransitionLink>
               ))}
             </div>
           </section>

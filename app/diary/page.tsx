@@ -1,7 +1,7 @@
 import Image from "next/image";
 import styles from "../media-archive/page.module.css";
-import Link from "next/link";
 import {getDiaries} from "@/lib/notion";
+import TransitionLink from "../components/TransitionLink";
 
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split("-");
@@ -18,9 +18,10 @@ export default async function DiaryPage() {
           <div className={styles.imageGrid}>
             {diaries.length === 0 && <p>現在、日記はありません。</p>}
             {diaries.map((diary) => (
-              <Link
+              <TransitionLink
                 key={diary.id}
                 href={`/diary/${diary.slug}`}
+                bgColor="var(--purple-background)"
                 className={styles.imageItem}
               >
                 <div className={styles.imageWrapper}>
@@ -42,7 +43,7 @@ export default async function DiaryPage() {
                     <p className={styles.date}>{formatDate(diary.date)}</p>
                   )}
                 </div>
-              </Link>
+              </TransitionLink>
             ))}
           </div>
         </section>
