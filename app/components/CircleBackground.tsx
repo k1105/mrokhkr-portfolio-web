@@ -26,7 +26,7 @@ interface Circle {
   animDuration?: number;
 }
 
-const MARGIN = 20;
+const COLUMNS = 10;
 const NUM_LARGE = 5;
 const NUM_SMALL_NORMAL = 8;
 const NUM_SMALL_SPECIAL = 2;
@@ -57,10 +57,7 @@ const HREF_TO_IMAGE: Record<string, string> = {
   "/works": "/nav/nav_works.svg",
 };
 
-const SPECIAL_CIRCLE_IMAGES = [
-  "/nav/nav_x.svg",
-  "/nav/nav_instagram.svg",
-];
+const SPECIAL_CIRCLE_IMAGES = ["/nav/nav_x.svg", "/nav/nav_instagram.svg"];
 
 const SPECIAL_EXTERNAL_LINKS: Record<string, string> = {
   "/nav/nav_x.svg": "https://x.com/mrhkokr",
@@ -105,7 +102,9 @@ interface CircleBackgroundProps {
   workThumbnails?: WorkThumbnail[];
 }
 
-export default function CircleBackground({ workThumbnails = [] }: CircleBackgroundProps) {
+export default function CircleBackground({
+  workThumbnails = [],
+}: CircleBackgroundProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -216,8 +215,9 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
 
       const clusterW = maxX - minX;
       const clusterH = maxY - minY;
-      const targetW = width - MARGIN * 2;
-      const targetH = height - MARGIN * 2;
+      const gridCell = width / COLUMNS;
+      const targetW = width - gridCell * 2;
+      const targetH = height - gridCell * 2;
       const finalScale = Math.min(targetW / clusterW, targetH / clusterH);
       const clusterCenterX = (minX + maxX) / 2;
       const clusterCenterY = (minY + maxY) / 2;
@@ -231,54 +231,81 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
       }
     };
 
+    const FILL_RATE_THRESHOLD = 0.5;
+    const MAX_ATTEMPTS = 10;
+
     const generatePackedCircles = (width: number, height: number) => {
-      const circles: Circle[] = [];
-      const baseR = 10;
+      const gridCell = width / COLUMNS;
+      const areaWidth = width - gridCell * 2;
+      const areaHeight = height - gridCell * 2;
+      const areaSize = areaWidth * areaHeight;
 
-      for (let i = 0; i < NUM_LARGE; i++) {
-        circles.push({
-          x: (Math.random() - 0.5) * 2,
-          y: (Math.random() - 0.5) * 2,
-          r: baseR,
-          type: "large",
-          isSpecial: false,
-          imagePath: RED_CIRCLE_IMAGES[i],
-        });
+      let bestCircles: Circle[] = [];
+      let bestFillRate = 0;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        const circles: Circle[] = [];
+        const baseR = 10;
+
+        for (let i = 0; i < NUM_LARGE; i++) {
+          circles.push({
+            x: (Math.random() - 0.5) * 2,
+            y: (Math.random() - 0.5) * 2,
+            r: baseR,
+            type: "large",
+            isSpecial: false,
+            imagePath: RED_CIRCLE_IMAGES[i],
+          });
+        }
+
+        const thumbCount = Math.min(NUM_SMALL_NORMAL, workThumbnails.length);
+        for (let i = 0; i < thumbCount; i++) {
+          circles.push({
+            x: (Math.random() - 0.5) * 2,
+            y: (Math.random() - 0.5) * 2,
+            r: baseR * SIZE_RATIO,
+            type: "small",
+            isSpecial: false,
+            imageIndex: i,
+            imagePath: workThumbnails[i].thumbnail,
+            workSlug: workThumbnails[i].slug,
+          });
+        }
+
+        for (let i = 0; i < NUM_SMALL_SPECIAL; i++) {
+          circles.push({
+            x: (Math.random() - 0.5) * 2,
+            y: 100,
+            r: baseR * SIZE_RATIO,
+            type: "small",
+            isSpecial: true,
+            imagePath: SPECIAL_CIRCLE_IMAGES[i],
+          });
+        }
+
+        const iterations = 3000;
+        for (let i = 0; i < iterations; i++) {
+          packStep(circles, width, height);
+        }
+        fitToScreen(circles, width, height);
+
+        // 充填率を計算
+        const totalCircleArea = circles.reduce(
+          (sum, c) => sum + Math.PI * c.r * c.r,
+          0,
+        );
+        const fillRate = totalCircleArea / areaSize;
+
+        if (fillRate > bestFillRate) {
+          bestFillRate = fillRate;
+          bestCircles = circles;
+        }
+
+        if (fillRate >= FILL_RATE_THRESHOLD) break;
       }
 
-      const thumbCount = Math.min(NUM_SMALL_NORMAL, workThumbnails.length);
-      for (let i = 0; i < thumbCount; i++) {
-        circles.push({
-          x: (Math.random() - 0.5) * 2,
-          y: (Math.random() - 0.5) * 2,
-          r: baseR * SIZE_RATIO,
-          type: "small",
-          isSpecial: false,
-          imageIndex: i,
-          imagePath: workThumbnails[i].thumbnail,
-          workSlug: workThumbnails[i].slug,
-        });
-      }
-
-      for (let i = 0; i < NUM_SMALL_SPECIAL; i++) {
-        circles.push({
-          x: (Math.random() - 0.5) * 2,
-          y: 100,
-          r: baseR * SIZE_RATIO,
-          type: "small",
-          isSpecial: true,
-          imagePath: SPECIAL_CIRCLE_IMAGES[i],
-        });
-      }
-
-      const iterations = 3000;
-      for (let i = 0; i < iterations; i++) {
-        packStep(circles, width, height);
-      }
-      fitToScreen(circles, width, height);
-
-      // ★修正: アニメーションの個体差（生命感）を事前に割り振る
-      for (const circle of circles) {
+      // アニメーションの個体差（生命感）を事前に割り振る
+      for (const circle of bestCircles) {
         circle.initialRotation = Math.random() * 360;
         circle.rotationDirection =
           Math.random() < 0.5 ? "clockwise" : "counterclockwise";
@@ -289,7 +316,7 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
         circle.animDuration = 1.0 + Math.random() * 0.4;
       }
 
-      return circles;
+      return bestCircles;
     };
 
     const updateCircles = () => {
@@ -651,7 +678,8 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
                 backgroundColor: gradientVisible
                   ? "transparent"
                   : "var(--purple-background)",
-                cursor: externalHref && pathname === "/" ? "pointer" : "default",
+                cursor:
+                  externalHref && pathname === "/" ? "pointer" : "default",
                 ["--initial-rotation" as string]: `${initialRotation}deg`,
               }}
             >
@@ -682,7 +710,8 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
               }}
               onClick={
                 externalHref
-                  ? () => window.open(externalHref, "_blank", "noopener,noreferrer")
+                  ? () =>
+                      window.open(externalHref, "_blank", "noopener,noreferrer")
                   : undefined
               }
             >
@@ -750,9 +779,7 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
             </div>
           );
         } else {
-          const workHref = circle.workSlug
-            ? `/works/${circle.workSlug}`
-            : null;
+          const workHref = circle.workSlug ? `/works/${circle.workSlug}` : null;
 
           return (
             <div
@@ -764,11 +791,7 @@ export default function CircleBackground({ workThumbnails = [] }: CircleBackgrou
                 cursor: workHref && pathname === "/" ? "pointer" : "default",
                 pointerEvents: pathname === "/" ? "auto" : "none",
               }}
-              onClick={
-                workHref
-                  ? () => router.push(workHref)
-                  : undefined
-              }
+              onClick={workHref ? () => router.push(workHref) : undefined}
             >
               <div
                 className={rotationClass}
