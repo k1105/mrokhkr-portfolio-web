@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {Inter, Zen_Kaku_Gothic_New} from "next/font/google";
 import Image from "next/image";
+import {Suspense} from "react";
 import "./globals.css";
 import styles from "./layout.module.css";
 import CircleBackground from "./components/CircleBackground";
@@ -83,7 +84,9 @@ export default async function RootLayout({
 
         {children}
         <Footer />
-        <GridOverlay />
+        <Suspense fallback={null}>
+          <GridOverlay />
+        </Suspense>
       </body>
     </html>
   );
