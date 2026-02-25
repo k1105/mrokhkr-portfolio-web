@@ -1,0 +1,10 @@
+name: Daily Rebuild
+on:
+  schedule:
+    - cron: '0 0 * * *' # 毎日UTC 0:00に実行（日本時間 9:00）
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Deploy Hook
+        run: curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_5XJRi3hYqKlA6xZDf265UvmqYLnJ/r16Wo3BwgT"
