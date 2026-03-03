@@ -13,22 +13,22 @@ interface CategoryInfo {
 const CATEGORIES: CategoryInfo[] = [
   {
     param: "visual-communication",
-    display: "伝えるものをつくる Visual Communication",
+    display: "伝えるものをつくる・Visual Communication",
     search: "伝えるものをつくる",
   },
   {
     param: "workshops-facilitation",
-    display: "関わりあう場をつくる Workshops & Facilitation",
+    display: "関わりあう場をつくる・Workshop & Fieldwork",
     search: "関わりあう場をつくる",
   },
   {
     param: "books-editorial",
-    display: "読みものをつくる Books & Editorial design",
+    display: "読みものをつくる・Publishing",
     search: "読みものをつくる",
   },
   {
     param: "study-research",
-    display: "試して、研究する Study & Research",
+    display: "試して、研究する・Study & Research",
     search: "試して、研究する",
   },
 ];
@@ -47,7 +47,9 @@ export default async function WorksPage() {
       <div className={styles.content}>
         {worksByCategory.map(({category, works: categoryWorks}) => (
           <section key={category.param} className={styles.section}>
-            <h2 className={styles.categoryTitle}>{category.display}</h2>
+            <h2 className={`${styles.categoryTitle} global-text-md`}>
+              {category.display}
+            </h2>
             <div className={styles.carousel}>
               {categoryWorks.map((work) => (
                 <TransitionLink
@@ -70,7 +72,7 @@ export default async function WorksPage() {
                     )}
                   </div>
                   <FadeText>
-                    <p>{work.name}</p>
+                    <p className="global-text-sm">{work.name}</p>
                   </FadeText>
                 </TransitionLink>
               ))}

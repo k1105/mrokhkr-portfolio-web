@@ -32,14 +32,12 @@
 }
 
 .title {
-  font-size: 1rem;
   font-weight: normal;
   margin-bottom: 1.5rem;
   color: #500b28;
 }
 
 .subtitle {
-  font-size: 0.7rem;
   line-height: 2;
   margin-bottom: 0;
   color: #500b28;
@@ -62,7 +60,6 @@
 
 .textContent {
   width: 100%;
-  font-size: 14px;
   line-height: 1.8;
   color: #500b28;
   word-wrap: break-word;
@@ -71,7 +68,6 @@
 }
 
 .textContent p {
-  font-size: 14px;
   margin-bottom: 8px;
 }
 
@@ -90,7 +86,6 @@
 }
 
 .imageCaption {
-  font-size: 14px;
   color: #500b28;
   margin-bottom: 0;
 }
@@ -115,12 +110,7 @@
   }
 
   .title {
-    font-size: 1.5rem;
     margin-bottom: 1.5rem;
-  }
-
-  .subtitle {
-    font-size: 0.8rem;
   }
 
   .imageWrapper {

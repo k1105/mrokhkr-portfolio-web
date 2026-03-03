@@ -70,8 +70,8 @@ export default async function WorkPage({params}: WorkPageProps) {
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.header}>
-          <h1 className={styles.title}>{work.name}</h1>
-          <p className={styles.subtitle}>
+          <h1 className={`${styles.title} global-text-lg`}>{work.name}</h1>
+          <p className={`${styles.subtitle} global-text-sm`}>
             <span className={styles.category}>{work.category}</span>
             {work.activity_period && (
               <span className={styles.activityPeriod}>
@@ -97,7 +97,11 @@ export default async function WorkPage({params}: WorkPageProps) {
         <div className={styles.textContent}>
           {content.map((block, index) => {
             if (block.type === "text") {
-              return <p key={index}>{renderRichText(block.rich_text)}</p>;
+              return (
+                <p className={`global-text-md`} key={index}>
+                  {renderRichText(block.rich_text)}
+                </p>
+              );
             } else if (block.type === "image") {
               return (
                 <div key={index} className={styles.contentImageWrapper}>
@@ -109,7 +113,7 @@ export default async function WorkPage({params}: WorkPageProps) {
                     className={styles.contentImage}
                   />
                   {block.caption && (
-                    <p className={styles.imageCaption}>{block.caption}</p>
+                    <p className={`global-text-sm`}>{block.caption}</p>
                   )}
                 </div>
               );

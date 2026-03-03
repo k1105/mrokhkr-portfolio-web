@@ -1,6 +1,6 @@
 .backButton {
   position: fixed;
-  bottom: var(--grid-cell);
+  bottom: calc(var(--grid-cell) / 2);
   left: var(--grid-cell);
   z-index: 1000;
   display: block;

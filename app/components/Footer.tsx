@@ -5,7 +5,7 @@ export default function Footer() {
 
   return (
     <footer className={styles.footer}>
-      <small className={styles.copyright}>©︎{year} Muraoka Hikaru</small>
+      <small className={`global-text-sm`}>©︎{year} Muraoka Hikaru</small>
     </footer>
   );
 }

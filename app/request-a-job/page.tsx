@@ -47,8 +47,8 @@ export default function RequestAJobPage() {
     return (
       <div className={styles.container}>
         <div className={styles.content}>
-          <h2 className={styles.formTitle}>送信完了</h2>
-          <p>
+          <h2 className={`${styles.formTitle} global-text-lg`}>送信完了</h2>
+          <p className="global-text-md">
             お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。
           </p>
         </div>
@@ -59,43 +59,43 @@ export default function RequestAJobPage() {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        {status === "error" && <p className={styles.error}>{errorMessage}</p>}
+        {status === "error" && <p className={`${styles.error} global-text-md`}>{errorMessage}</p>}
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="name" className={styles.label}>
+            <label htmlFor="name" className={`${styles.label} global-text-md`}>
               お名前
             </label>
             <input
               type="text"
               id="name"
               name="name"
-              className={styles.input}
+              className={`${styles.input} global-text-md`}
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>
+            <label htmlFor="email" className={`${styles.label} global-text-md`}>
               メールアドレス
             </label>
             <input
               type="email"
               id="email"
               name="email"
-              className={styles.input}
+              className={`${styles.input} global-text-md`}
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="workType" className={styles.label}>
+            <label htmlFor="workType" className={`${styles.label} global-text-md`}>
               お仕事の種類
             </label>
             <select
               id="workType"
               name="workType"
-              className={styles.select}
+              className={`${styles.select} global-text-md`}
               required
               defaultValue=""
             >
@@ -111,21 +111,21 @@ export default function RequestAJobPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="inquiry" className={styles.label}>
+            <label htmlFor="inquiry" className={`${styles.label} global-text-md`}>
               お問い合わせ内容
             </label>
             <textarea
               id="inquiry"
               name="inquiry"
               rows={6}
-              className={styles.textarea}
+              className={`${styles.textarea} global-text-md`}
               required
             />
           </div>
 
           <button
             type="submit"
-            className={styles.submitButton}
+            className={`${styles.submitButton} global-text-md`}
             disabled={status === "sending"}
           >
             {status === "sending" ? "送信中..." : "送信"}

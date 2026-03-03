@@ -34,7 +34,6 @@
 
 .categoryTitle {
   color: var(--primary-color);
-  font-size: 0.9rem;
   font-weight: normal;
   padding-left: calc(var(--grid-cell) * 1);
   margin: 0;
@@ -92,12 +91,10 @@
   justify-content: center;
   background-color: #f0f0f0;
   color: #999;
-  font-size: 14px;
 }
 
 .textContent {
   width: 100%;
-  font-size: 0.7rem;
   line-height: 1.8;
   color: #500b28;
   overflow: hidden;
@@ -110,7 +107,6 @@
 }
 
 .textContent p {
-  font-size: 0.7rem;
   margin-bottom: 0;
 }
 

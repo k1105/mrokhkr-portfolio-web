@@ -17,27 +17,27 @@ export default function About() {
             priority
           />
         </div>
-        <div className={styles.profileInfo}>
-          <h1 className={styles.name}>
+        <div className={`${styles.profileInfo} global-text-md`}>
+          <h1 className={`${styles.name} global-text-lg`}>
             村岡光 <span className={styles.nameEn}>Muraoka Hikaru</span>
           </h1>
-          <p className={styles.profession}>
+          <p className={`${styles.profession} global-text-md`}>
             グラフィックデザイナー/ワークショップデザイナー
           </p>
 
           <div className={styles.description}>
-            <p>
-              会社員としてのデザイナーとして働きながら、フリーランスやNPO（一般社団法人）での個人活動も行っています。
+            <p className={`global-text-md`}>
+              企業でデザイナーとして働きながら、フリーランスやNPO（一般社団法人）での個人活動も行っています。
             </p>
-            <p>
+            <p className={`global-text-md`}>
               最近は、他者との関係性や対話、場づくりに関心があり、視覚表現や体験設計、言葉の編集など、これまでのデザインの実践を手がかりに探究しています。
             </p>
           </div>
           <hr className={styles.divider} />
 
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>略歴 Biography</h2>
-            <ul className={styles.list}>
+            <h2 className={`${styles.sectionTitle} global-text-lg`}>略歴 Biography</h2>
+            <ul className={`${styles.list} global-text-md`}>
               <li>1999年 宮城県うまれ</li>
               <li>2022年 東北芸術工科大学グラフィックデザイン学科 卒業</li>
               <li>2022年~ 株式会社東芝 DX・デザイン & コミュニケーション部</li>
@@ -46,8 +46,8 @@ export default function About() {
           </section>
           <hr className={styles.divider} />
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>受賞歴 Awards</h2>
-            <ul className={styles.list}>
+            <h2 className={`${styles.sectionTitle} global-text-lg`}>受賞歴 Awards</h2>
+            <ul className={`${styles.list} global-text-md`}>
               <li>2020年 Adobe CCJ UIUX デザインコンペ 最優秀賞</li>
               <li>2020年 総務省統計局 統計グラフコンクール入選</li>
               <li>

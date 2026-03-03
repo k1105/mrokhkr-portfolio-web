@@ -64,7 +64,6 @@
 
 .textContent {
   width: 100%;
-  font-size: 14px;
   line-height: 1.8;
   color: #500b28;
   display: flex;
@@ -77,7 +76,6 @@
 }
 
 .textContent p {
-  font-size: 14px;
   margin-bottom: 0;
 }
 

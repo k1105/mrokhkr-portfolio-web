@@ -39,3 +39,48 @@ a {
   color: var(--link-color);
   text-decoration: underline;
 }
+
+.global-text-xl {
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+}
+
+.global-text-lg {
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+.global-text-md {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.global-text-sm {
+  font-size: 0.7rem;
+  letter-spacing: -0.01em;
+}
+
+.global-text-xs {
+  font-size: 0.6rem;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+  .global-text-xl {
+    font-size: 1.2rem;
+  }
+  .global-text-lg {
+    font-size: 1rem;
+  }
+  .global-text-md {
+    font-size: 0.7rem;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+  .global-text-sm {
+    font-size: 0.6rem;
+  }
+  .global-text-xs {
+    font-size: 0.5rem;
+  }
+}
