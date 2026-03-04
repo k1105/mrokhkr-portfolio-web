@@ -47,10 +47,15 @@ export default function RequestAJobPage() {
     return (
       <div className={styles.container}>
         <div className={styles.content}>
-          <h2 className={`${styles.formTitle} global-text-lg`}>送信完了</h2>
-          <p className="global-text-md">
-            お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。
-          </p>
+          <div className={styles.header}>
+            <h1 className={`${styles.title} global-text-lg`}>お問い合わせフォーム</h1>
+          </div>
+          <div className={styles.contentWrapper}>
+            <h2 className={`${styles.formTitle} global-text-lg`}>送信完了</h2>
+            <p className="global-text-md">
+              お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -59,9 +64,14 @@ export default function RequestAJobPage() {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        {status === "error" && <p className={`${styles.error} global-text-md`}>{errorMessage}</p>}
+        <div className={styles.header}>
+          <h1 className={`${styles.title} global-text-lg`}>お問い合わせフォーム</h1>
+        </div>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.contentWrapper}>
+          {status === "error" && <p className={`${styles.error} global-text-md`}>{errorMessage}</p>}
+
+          <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="name" className={`${styles.label} global-text-md`}>
               お名前
@@ -130,7 +140,8 @@ export default function RequestAJobPage() {
           >
             {status === "sending" ? "送信中..." : "送信"}
           </button>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

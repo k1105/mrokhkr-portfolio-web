@@ -7,7 +7,7 @@
 .content {
   width: calc(var(--grid-cell) * 8);
   margin: 0 auto;
-  padding-top: calc(var(--grid-cell) * 3);
+  padding-top: calc(var(--grid-cell) * 4);
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -62,7 +62,6 @@
 
 .description {
   margin-bottom: 48px;
-  max-width: 400px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word;
@@ -95,22 +94,23 @@
 /* PC版のスタイル */
 @media (min-width: 768px) {
   .content {
+    width: calc(var(--grid-cell) * 14);
     padding-top: calc(var(--grid-cell) * 2);
     flex-direction: row;
-    gap: calc(var(--grid-cell) * 1);
+    gap: var(--grid-cell);
     align-items: flex-start;
     position: relative;
     z-index: 0;
   }
 
   .profileImageWrapper {
-    width: calc(var(--grid-cell) * 2);
+    width: calc(var(--grid-cell) * 4);
     padding-left: 0;
     flex-shrink: 0;
   }
 
   .profileInfo {
-    width: calc(var(--grid-cell) * 5);
+    width: calc(var(--grid-cell) * 9);
     flex-shrink: 0;
     padding-top: 0;
   }

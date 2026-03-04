@@ -38,9 +38,9 @@ export default async function DiaryPage() {
                   )}
                 </div>
                 <div className={styles.textContent}>
-                  <p>{diary.title}</p>
+                  <p className={`global-text-md`}>{diary.title}</p>
                   {diary.date && (
-                    <p className={styles.date}>{formatDate(diary.date)}</p>
+                    <p className={`global-text-sm`}>{formatDate(diary.date)}</p>
                   )}
                 </div>
               </TransitionLink>

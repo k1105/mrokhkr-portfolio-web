@@ -8,10 +8,16 @@
   --grid-cell: 10vw;
 }
 
+@media (min-width: 768px) {
+  :root {
+    --grid-cell: 5vw;
+  }
+}
+
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -43,26 +49,31 @@ a {
 .global-text-xl {
   font-size: 1.4rem;
   letter-spacing: -0.01em;
+  color: red;
 }
 
 .global-text-lg {
   font-size: 1.2rem;
   letter-spacing: -0.01em;
+  color: blue;
 }
 
 .global-text-md {
   font-size: 1rem;
   letter-spacing: -0.01em;
+  color: green;
 }
 
 .global-text-sm {
   font-size: 0.7rem;
   letter-spacing: -0.01em;
+  color: orange;
 }
 
 .global-text-xs {
   font-size: 0.6rem;
   letter-spacing: -0.01em;
+  color: purple;
 }
 
 @media (max-width: 768px) {
@@ -73,7 +84,7 @@ a {
     font-size: 1rem;
   }
   .global-text-md {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     line-height: 1.5;
     letter-spacing: -0.01em;
   }

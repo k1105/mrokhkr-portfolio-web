@@ -64,15 +64,9 @@
 
 .textContent {
   width: 100%;
-  line-height: 1.8;
-  color: #500b28;
   display: flex;
-  justify-content: space-between;
-}
-
-.date {
-  width: 12rem;
-  text-align: right;
+  gap: 0.5rem;
+  flex-direction: column;
 }
 
 .textContent p {
@@ -82,6 +76,7 @@
 /* PC版のスタイル */
 @media (min-width: 768px) {
   .content {
+    width: calc(var(--grid-cell) * 16);
     padding-top: calc(var(--grid-cell) * 2);
     padding-bottom: 60px;
     gap: 60px;

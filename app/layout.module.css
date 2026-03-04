@@ -1,6 +1,6 @@
 .headerTopLeft {
   position: fixed;
-  top: var(--grid-cell);
+  top: calc(var(--grid-cell) * 2);
   left: calc(var(--grid-cell) - 1rem);
   z-index: 1000;
   color: inherit;
@@ -9,7 +9,7 @@
 
 .headerTopRight {
   position: fixed;
-  top: var(--grid-cell);
+  top: calc(var(--grid-cell) * 2);
   left: calc(var(--grid-cell) * 9);
   z-index: 1000;
   color: inherit;
@@ -24,6 +24,19 @@
 .headerTopRight img {
   width: 20px !important;
   height: 300px !important;
+}
+
+/* PC版のスタイル */
+@media (min-width: 768px) {
+  .headerTopLeft {
+    top: var(--grid-cell);
+    left: var(--grid-cell);
+  }
+  .headerTopRight {
+    top: var(--grid-cell);
+    left: auto;
+    right: var(--grid-cell);
+  }
 }
 
 /* sp版（スマートフォン）のスタイル */

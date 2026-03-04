@@ -33,7 +33,6 @@
 }
 
 .categoryTitle {
-  color: var(--primary-color);
   font-weight: normal;
   padding-left: calc(var(--grid-cell) * 1);
   margin: 0;
@@ -96,7 +95,6 @@
 .textContent {
   width: 100%;
   line-height: 1.8;
-  color: #500b28;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -118,10 +116,23 @@
     gap: 60px;
     position: relative;
     z-index: 0;
+    width: calc(var(--grid-cell) * 14);
+    margin: 0 auto;
   }
 
   .section {
     gap: 32px;
+  }
+
+  .categoryTitle {
+    padding-left: 0;
+  }
+
+  .carousel {
+    gap: calc(var(--grid-cell) * 0.25);
+    padding-left: calc((100vw - var(--grid-cell) * 14) / 2);
+    margin-left: calc(-1 * (100vw - var(--grid-cell) * 14) / 2);
+    margin-right: calc(-1 * (100vw - var(--grid-cell) * 14) / 2);
   }
 
   .imageWrapper {

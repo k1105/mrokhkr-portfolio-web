@@ -3,11 +3,18 @@
   z-index: 1;
   width: calc(var(--grid-cell) * 8);
   margin: auto auto 0;
-  padding-bottom: var(--grid-cell);
+  padding-bottom: calc(var(--grid-cell) * 2.5);
   display: flex;
   justify-content: flex-end;
 }
 
 .copyright {
   color: var(--primary-color);
+}
+
+@media (min-width: 768px) {
+  .footer {
+    width: calc(var(--grid-cell) * 18);
+    padding-bottom: calc(var(--grid-cell) * 1);
+  }
 }

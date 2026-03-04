@@ -18,3 +18,12 @@
   width: 100%;
   height: 100%;
 }
+
+@media (min-width: 768px) {
+  .backButton {
+    bottom: var(--grid-cell);
+    left: var(--grid-cell);
+    width: var(--grid-cell);
+    height: var(--grid-cell);
+  }
+}

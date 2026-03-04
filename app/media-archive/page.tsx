@@ -16,7 +16,11 @@ export default async function MediaArchivePage() {
       <div className={styles.content}>
         <section className={styles.section}>
           <div className={styles.imageGrid}>
-            {archives.length === 0 && <p className="global-text-md">現在、メディア掲載情報はありません。</p>}
+            {archives.length === 0 && (
+              <p className="global-text-md">
+                現在、メディア掲載情報はありません。
+              </p>
+            )}
             {archives.map((archive) => (
               <Link
                 key={archive.id}
@@ -40,7 +44,9 @@ export default async function MediaArchivePage() {
                 <div className={`${styles.textContent} global-text-md`}>
                   <p>{archive.title}</p>
                   {archive.date && (
-                    <p className={styles.date}>{formatDate(archive.date)}</p>
+                    <p className={`global-text-sm`}>
+                      {formatDate(archive.date)}
+                    </p>
                   )}
                 </div>
               </Link>

@@ -49,6 +49,7 @@
 /* PC版のスタイル */
 @media (min-width: 768px) {
   .content {
-    padding-top: calc(var(--grid-cell) * 2);
+    width: calc(var(--grid-cell) * 16);
+    padding-top: calc(var(--grid-cell) * 4);
   }
 }

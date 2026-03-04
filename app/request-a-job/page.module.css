@@ -26,6 +26,21 @@
   }
 }
 
+.header {
+  width: 100%;
+}
+
+.title {
+  font-weight: normal;
+  margin-bottom: 0.5rem;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .formTitle {
   font-weight: normal;
   color: #500b28;
@@ -130,23 +145,33 @@
 /* PC版のスタイル */
 @media (min-width: 768px) {
   .content {
+    width: calc(var(--grid-cell) * 14);
     padding-top: calc(var(--grid-cell) * 2);
     padding-bottom: 60px;
-    gap: 60px;
+    gap: var(--grid-cell);
     position: relative;
     z-index: 0;
+    flex-direction: row;
+  }
+
+  .contentWrapper {
+    width: calc(var(--grid-cell) * 9);
+  }
+
+  .header {
+    text-align: left;
+    width: calc(var(--grid-cell) * 4);
+    position: sticky;
+    top: calc(var(--grid-cell) * 2);
+    align-self: flex-start;
   }
 
   .form {
-    width: calc(var(--grid-cell) * 4);
+    width: 100%;
     gap: 32px;
-    margin: 0 auto;
   }
 
   .formTitle {
     margin-bottom: 0;
-    width: calc(var(--grid-cell) * 4);
-    margin-left: auto;
-    margin-right: auto;
   }
 }

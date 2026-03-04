@@ -79,49 +79,51 @@ export default async function DiaryDetailPage({params}: DiaryPageProps) {
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.header}>
-          <h1 className={styles.title}>{diary.title}</h1>
+          <h1 className={`${styles.title} global-text-lg`}>{diary.title}</h1>
           {diary.date && (
-            <p className={styles.subtitle}>{formatDate(diary.date)}</p>
+            <p className={`${styles.subtitle} global-text-sm`}>{formatDate(diary.date)}</p>
           )}
         </div>
 
-        {diary.thumbnail && (
-          <div className={styles.imageWrapper}>
-            <Image
-              src={diary.thumbnail}
-              alt={diary.title}
-              width={600}
-              height={400}
-              className={styles.mainImage}
-              priority
-            />
-          </div>
-        )}
+        <div className={styles.contentWrapper}>
+          {diary.thumbnail && (
+            <div className={styles.imageWrapper}>
+              <Image
+                src={diary.thumbnail}
+                alt={diary.title}
+                width={600}
+                height={400}
+                className={styles.mainImage}
+                priority
+              />
+            </div>
+          )}
 
-        <div className={styles.textContent}>
-          {content.map((block, index) => {
-            if (block.type === "text") {
-              return <p key={index}>{renderRichText(block.rich_text)}</p>;
-            } else if (block.type === "image") {
-              return (
-                <div key={index} className={styles.contentImageWrapper}>
-                  <Image
-                    src={block.url}
-                    alt={block.caption || ""}
-                    width={600}
-                    height={400}
-                    className={styles.contentImage}
-                  />
-                  {block.caption && (
-                    <p className={styles.imageCaption}>{block.caption}</p>
-                  )}
-                </div>
-              );
-            } else if (block.type === "divider") {
-              return <div key={index} className={styles.divider} />;
-            }
-            return null;
-          })}
+          <div className={styles.textContent}>
+            {content.map((block, index) => {
+              if (block.type === "text") {
+                return <p className="global-text-md" key={index}>{renderRichText(block.rich_text)}</p>;
+              } else if (block.type === "image") {
+                return (
+                  <div key={index} className={styles.contentImageWrapper}>
+                    <Image
+                      src={block.url}
+                      alt={block.caption || ""}
+                      width={600}
+                      height={400}
+                      className={styles.contentImage}
+                    />
+                    {block.caption && (
+                      <p className={`${styles.imageCaption} global-text-sm`}>{block.caption}</p>
+                    )}
+                  </div>
+                );
+              } else if (block.type === "divider") {
+                return <div key={index} className={styles.divider} />;
+              }
+              return null;
+            })}
+          </div>
         </div>
       </div>
     </div>
