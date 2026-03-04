@@ -56,6 +56,8 @@ export default function RequestAJobPage() {
             <p className="global-text-md">
               送信完了しました。 <br />
               <br />
+              お問い合わせいただき、ありがとうございます。
+              <br />
               いただいた内容を確認のうえ、返信いたします。
               <br />
               しばらくお待ちください。
