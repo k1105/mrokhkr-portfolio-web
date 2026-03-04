@@ -53,31 +53,26 @@ a {
 .global-text-xl {
   font-size: 1.4rem;
   letter-spacing: -0.01em;
-  color: red;
 }
 
 .global-text-lg {
   font-size: 1.2rem;
   letter-spacing: -0.01em;
-  color: blue;
 }
 
 .global-text-md {
   font-size: 1rem;
   letter-spacing: -0.01em;
-  color: green;
 }
 
 .global-text-sm {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   letter-spacing: -0.01em;
-  color: orange;
 }
 
 .global-text-xs {
   font-size: 0.6rem;
   letter-spacing: -0.01em;
-  color: purple;
 }
 
 @media (max-width: 768px) {

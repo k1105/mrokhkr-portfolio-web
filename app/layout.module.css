@@ -17,13 +17,13 @@
 }
 
 .headerTopLeft img {
-  width: 300px !important;
-  height: 20px !important;
+  width: calc(var(--grid-cell) * 4.5) !important;
+  height: calc(var(--grid-cell) * 0.3) !important;
 }
 
 .headerTopRight img {
-  width: 20px !important;
-  height: 300px !important;
+  width: calc(var(--grid-cell) * 0.3) !important;
+  height: calc(var(--grid-cell) * 4) !important;
 }
 
 /* PC版のスタイル */
