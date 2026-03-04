@@ -1,6 +1,6 @@
 .headerTopLeft {
   position: fixed;
-  top: calc(var(--grid-cell) * 2);
+  top: calc(var(--grid-cell) * 1);
   left: calc(var(--grid-cell) - 1rem);
   z-index: 1000;
   color: inherit;
@@ -9,7 +9,7 @@
 
 .headerTopRight {
   position: fixed;
-  top: calc(var(--grid-cell) * 2);
+  top: calc(var(--grid-cell) * 1);
   left: calc(var(--grid-cell) * 9);
   z-index: 1000;
   color: inherit;

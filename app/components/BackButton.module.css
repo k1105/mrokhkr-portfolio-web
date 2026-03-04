@@ -4,8 +4,8 @@
   left: var(--grid-cell);
   z-index: 1000;
   display: block;
-  width: 48px;
-  height: 48px;
+  width: var(--grid-cell);
+  height: var(--grid-cell);
   transition: opacity 0.2s ease;
   text-decoration: none;
 }

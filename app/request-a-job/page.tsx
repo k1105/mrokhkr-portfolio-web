@@ -48,12 +48,17 @@ export default function RequestAJobPage() {
       <div className={styles.container}>
         <div className={styles.content}>
           <div className={styles.header}>
-            <h1 className={`${styles.title} global-text-lg`}>お問い合わせフォーム</h1>
+            <h1 className={`${styles.title} global-text-lg`}>
+              お問い合わせフォーム
+            </h1>
           </div>
           <div className={styles.contentWrapper}>
-            <h2 className={`${styles.formTitle} global-text-lg`}>送信完了</h2>
             <p className="global-text-md">
-              お問い合わせありがとうございます。内容を確認次第、ご連絡いたします。
+              送信完了しました。 <br />
+              <br />
+              いただいた内容を確認のうえ、返信いたします。
+              <br />
+              しばらくお待ちください。
             </p>
           </div>
         </div>
@@ -65,81 +70,99 @@ export default function RequestAJobPage() {
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.header}>
-          <h1 className={`${styles.title} global-text-lg`}>お問い合わせフォーム</h1>
+          <h1 className={`${styles.title} global-text-lg`}>
+            お問い合わせフォーム
+          </h1>
         </div>
 
         <div className={styles.contentWrapper}>
-          {status === "error" && <p className={`${styles.error} global-text-md`}>{errorMessage}</p>}
+          {status === "error" && (
+            <p className={`${styles.error} global-text-md`}>{errorMessage}</p>
+          )}
 
           <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="name" className={`${styles.label} global-text-md`}>
-              お名前
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              className={`${styles.input} global-text-md`}
-              required
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label
+                htmlFor="name"
+                className={`${styles.label} global-text-md`}
+              >
+                お名前
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                className={`${styles.input} global-text-md`}
+                required
+              />
+            </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={`${styles.label} global-text-md`}>
-              メールアドレス
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className={`${styles.input} global-text-md`}
-              required
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label
+                htmlFor="email"
+                className={`${styles.label} global-text-md`}
+              >
+                メールアドレス
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className={`${styles.input} global-text-md`}
+                required
+              />
+            </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="workType" className={`${styles.label} global-text-md`}>
-              お仕事の種類
-            </label>
-            <select
-              id="workType"
-              name="workType"
-              className={`${styles.select} global-text-md`}
-              required
-              defaultValue=""
+            <div className={styles.formGroup}>
+              <label
+                htmlFor="workType"
+                className={`${styles.label} global-text-md`}
+              >
+                お仕事の種類
+              </label>
+              <select
+                id="workType"
+                name="workType"
+                className={`${styles.select} global-text-md`}
+                required
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  選択してください
+                </option>
+                <option value="デザインを依頼したい">
+                  デザインを依頼したい
+                </option>
+                <option value="作品や活動のことについて聞きたい">
+                  作品や活動のことについて聞きたい
+                </option>
+                <option value="その他のご相談">その他のご相談</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label
+                htmlFor="inquiry"
+                className={`${styles.label} global-text-md`}
+              >
+                お問い合わせ内容
+              </label>
+              <textarea
+                id="inquiry"
+                name="inquiry"
+                rows={6}
+                className={`${styles.textarea} global-text-md`}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className={`${styles.submitButton} global-text-md`}
+              disabled={status === "sending"}
             >
-              <option value="" disabled>
-                選択してください
-              </option>
-              <option value="デザインを依頼したい">デザインを依頼したい</option>
-              <option value="作品や活動のことについて聞きたい">
-                作品や活動のことについて聞きたい
-              </option>
-              <option value="その他のご相談">その他のご相談</option>
-            </select>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="inquiry" className={`${styles.label} global-text-md`}>
-              お問い合わせ内容
-            </label>
-            <textarea
-              id="inquiry"
-              name="inquiry"
-              rows={6}
-              className={`${styles.textarea} global-text-md`}
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className={`${styles.submitButton} global-text-md`}
-            disabled={status === "sending"}
-          >
-            {status === "sending" ? "送信中..." : "送信"}
-          </button>
+              {status === "sending" ? "送信中..." : "送信"}
+            </button>
           </form>
         </div>
       </div>

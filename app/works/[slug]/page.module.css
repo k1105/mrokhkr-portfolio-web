@@ -12,7 +12,7 @@
   padding-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: calc(var(--grid-cell) * 0.75);
   opacity: 0;
   animation: fadeIn 0.5s ease-in forwards;
   animation-delay: 0.3s;
@@ -46,7 +46,7 @@
   line-height: 1.5;
   margin-bottom: 0;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
 }
 
 .imageWrapper {
@@ -123,6 +123,10 @@
 
   .title {
     margin-bottom: 1.5rem;
+  }
+
+  .subtitle {
+    flex-direction: column;
   }
 
   .imageWrapper {

@@ -11,7 +11,7 @@
   padding-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 0;
   opacity: 0;
   animation: fadeIn 0.5s ease-in forwards;
   animation-delay: 0.3s;
@@ -31,8 +31,7 @@
 }
 
 .title {
-  font-weight: normal;
-  margin-bottom: 0.5rem;
+  display: none;
 }
 
 .contentWrapper {
@@ -63,7 +62,6 @@
 }
 
 .label {
-  color: #500b28;
   font-weight: normal;
 }
 
@@ -73,7 +71,6 @@
   width: 100%;
   padding: 12px;
   font-family: inherit;
-  color: #500b28;
   background-color: white;
   border: 0.75px solid #500b28;
   border-radius: 0;
@@ -104,7 +101,6 @@
   width: 100%;
   padding: 12px;
   font-family: inherit;
-  color: #500b28;
   background-color: var(--purple-background);
   border: 0.75px solid #500b28;
   border-radius: 0;
@@ -152,6 +148,11 @@
     position: relative;
     z-index: 0;
     flex-direction: row;
+  }
+
+  .title {
+    display: block;
+    font-weight: normal;
   }
 
   .contentWrapper {

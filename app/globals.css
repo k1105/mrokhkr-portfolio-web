@@ -8,6 +8,10 @@
   --grid-cell: 10vw;
 }
 
+* {
+  color: var(--primary-color);
+}
+
 @media (min-width: 768px) {
   :root {
     --grid-cell: 5vw;
@@ -81,7 +85,7 @@ a {
     font-size: 1.2rem;
   }
   .global-text-lg {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
   .global-text-md {
     font-size: 0.75rem;
@@ -89,9 +93,10 @@ a {
     letter-spacing: -0.01em;
   }
   .global-text-sm {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
+    line-height: 1.2;
   }
   .global-text-xs {
-    font-size: 0.5rem;
+    font-size: 0.4rem;
   }
 }

@@ -3,7 +3,7 @@
   z-index: 1;
   width: calc(var(--grid-cell) * 8);
   margin: auto auto 0;
-  padding-bottom: calc(var(--grid-cell) * 2.5);
+  padding-bottom: calc(var(--grid-cell) * 0.4);
   display: flex;
   justify-content: flex-end;
 }
