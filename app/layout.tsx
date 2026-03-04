@@ -10,6 +10,7 @@ import BackButton from "./components/BackButton";
 import Footer from "./components/Footer";
 import GridOverlay from "./components/GridOverlay";
 import PageTransitionOverlay from "./components/PageTransitionOverlay";
+import SmoothScroll from "./components/SmoothScroll";
 import Link from "next/link";
 import {getWorks} from "../lib/notion";
 
@@ -80,6 +81,7 @@ export default async function RootLayout({
         {/* 円の背景 */}
         <CircleBackground workThumbnails={workThumbnails} />
         <PageTransitionOverlay />
+        <SmoothScroll />
 
         {/* 左下: 上の階層へ戻るボタン */}
         <BackButton />
