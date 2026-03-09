@@ -9,7 +9,7 @@ export default function About() {
       <div className={styles.content}>
         <div className={styles.profileImageWrapper}>
           <Image
-            src="/profile.png"
+            src="/profile.jpg"
             alt="村岡光"
             width={300}
             height={300}
@@ -36,7 +36,9 @@ export default function About() {
           <hr className={styles.divider} />
 
           <section className={styles.section}>
-            <h2 className={`${styles.sectionTitle} global-text-lg`}>略歴 Biography</h2>
+            <h2 className={`${styles.sectionTitle} global-text-lg`}>
+              略歴 Biography
+            </h2>
             <ul className={`${styles.list} global-text-md`}>
               <li>1999年 宮城県うまれ</li>
               <li>2022年 東北芸術工科大学グラフィックデザイン学科 卒業</li>
@@ -46,7 +48,9 @@ export default function About() {
           </section>
           <hr className={styles.divider} />
           <section className={styles.section}>
-            <h2 className={`${styles.sectionTitle} global-text-lg`}>受賞歴 Awards</h2>
+            <h2 className={`${styles.sectionTitle} global-text-lg`}>
+              受賞歴 Awards
+            </h2>
             <ul className={`${styles.list} global-text-md`}>
               <li>2020年 Adobe CCJ UIUX デザインコンペ 最優秀賞</li>
               <li>2020年 総務省統計局 統計グラフコンクール入選</li>
