@@ -5,14 +5,14 @@ import {Suspense} from "react";
 import "./globals.css";
 import styles from "./layout.module.css";
 import CircleBackground from "./components/CircleBackground";
-import type {WorkThumbnail} from "./components/CircleBackground";
+import type {ContentThumbnail} from "./components/CircleBackground";
 import BackButton from "./components/BackButton";
 import Footer from "./components/Footer";
 import GridOverlay from "./components/GridOverlay";
 import PageTransitionOverlay from "./components/PageTransitionOverlay";
 import SmoothScroll from "./components/SmoothScroll";
 import Link from "next/link";
-import {getWorks} from "../lib/notion";
+import {getWorks, getDiaries} from "../lib/notion";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,23 +41,31 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ビルド時にworksを取得し、サムネイル付きのものから12件ランダムピック（PC:8件、スマホ:12件）
-  const works = await getWorks();
-  const worksWithThumbnails = works.filter((w) => w.thumbnail);
-  // slugで重複を排除
-  const uniqueWorks = Array.from(
-    new Map(worksWithThumbnails.map((w) => [w.slug, w])).values(),
-  );
-  // Fisher-Yatesシャッフル
-  const shuffled = [...uniqueWorks];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  // ビルド時にworks・diaryを取得し、サムネイル付きのものから12件ランダムピック（PC:8件、スマホ:12件）
+  const [works, diaries] = await Promise.all([getWorks(), getDiaries()]);
+
+  // サムネイル付きのコンテンツを統合（slugで重複排除）
+  const contentItems: ContentThumbnail[] = [];
+  const seen = new Set<string>();
+  for (const w of works) {
+    if (w.thumbnail && !seen.has(w.slug)) {
+      seen.add(w.slug);
+      contentItems.push({href: `/works/${w.slug}`, thumbnail: w.thumbnail});
+    }
   }
-  const workThumbnails: WorkThumbnail[] = shuffled.slice(0, 12).map((w) => ({
-    slug: w.slug,
-    thumbnail: w.thumbnail!,
-  }));
+  for (const d of diaries) {
+    if (d.thumbnail && !seen.has(d.slug)) {
+      seen.add(d.slug);
+      contentItems.push({href: `/diary/${d.slug}`, thumbnail: d.thumbnail});
+    }
+  }
+
+  // Fisher-Yatesシャッフル
+  for (let i = contentItems.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [contentItems[i], contentItems[j]] = [contentItems[j], contentItems[i]];
+  }
+  const contentThumbnails = contentItems.slice(0, 12);
 
   return (
     <html lang="ja">
@@ -88,7 +96,7 @@ export default async function RootLayout({
         </Link>
 
         {/* 円の背景 */}
-        <CircleBackground workThumbnails={workThumbnails} />
+        <CircleBackground contentThumbnails={contentThumbnails} />
         <PageTransitionOverlay />
         <SmoothScroll />
 

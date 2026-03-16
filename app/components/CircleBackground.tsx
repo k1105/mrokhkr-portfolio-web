@@ -5,8 +5,8 @@ import {useEffect, useLayoutEffect, useState, useRef} from "react";
 import {usePathname, useRouter} from "next/navigation";
 import styles from "./CircleBackground.module.css";
 
-export interface WorkThumbnail {
-  slug: string;
+export interface ContentThumbnail {
+  href: string;
   thumbnail: string;
 }
 
@@ -18,7 +18,7 @@ interface Circle {
   isSpecial: boolean;
   imageIndex?: number;
   imagePath?: string;
-  workSlug?: string;
+  contentHref?: string;
   initialRotation?: number;
   rotationDirection?: "clockwise" | "counterclockwise";
   // アニメーション用の個体差パラメータを追加
@@ -101,11 +101,11 @@ const getBackgroundColor = (imagePath: string | undefined): string => {
 };
 
 interface CircleBackgroundProps {
-  workThumbnails?: WorkThumbnail[];
+  contentThumbnails?: ContentThumbnail[];
 }
 
 export default function CircleBackground({
-  workThumbnails = [],
+  contentThumbnails = [],
 }: CircleBackgroundProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -261,7 +261,7 @@ export default function CircleBackground({
         }
 
         const numSmallNormal = width < MOBILE_BREAKPOINT ? NUM_SMALL_NORMAL_MOBILE : NUM_SMALL_NORMAL_DESKTOP;
-        const thumbCount = Math.min(numSmallNormal, workThumbnails.length);
+        const thumbCount = Math.min(numSmallNormal, contentThumbnails.length);
         for (let i = 0; i < thumbCount; i++) {
           circles.push({
             x: (Math.random() - 0.5) * 2,
@@ -270,8 +270,8 @@ export default function CircleBackground({
             type: "small",
             isSpecial: false,
             imageIndex: i,
-            imagePath: workThumbnails[i].thumbnail,
-            workSlug: workThumbnails[i].slug,
+            imagePath: contentThumbnails[i].thumbnail,
+            contentHref: contentThumbnails[i].href,
           });
         }
 
@@ -808,7 +808,7 @@ export default function CircleBackground({
             </div>
           );
         } else {
-          const workHref = circle.workSlug ? `/works/${circle.workSlug}` : null;
+          const contentHref = circle.contentHref || null;
 
           return (
             <div
@@ -817,10 +817,10 @@ export default function CircleBackground({
                 ...wrapperStyle,
                 opacity: isHidden ? 0 : 1,
                 transition: "opacity 0.2s",
-                cursor: workHref && pathname === "/" ? "pointer" : "default",
+                cursor: contentHref && pathname === "/" ? "pointer" : "default",
                 pointerEvents: pathname === "/" ? "auto" : "none",
               }}
-              onClick={workHref ? () => router.push(workHref) : undefined}
+              onClick={contentHref ? () => router.push(contentHref) : undefined}
             >
               <div
                 className={rotationClass}
