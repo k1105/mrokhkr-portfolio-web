@@ -28,7 +28,7 @@ const zenKakuGothicNew = Zen_Kaku_Gothic_New({
 import type {Viewport} from "next";
 
 export const metadata: Metadata = {
-  title: "Design Project of Muraoka Hikaru",
+  title: "Design Project of Hikaru Muraoka",
   description: "村岡 光のポートフォリオサイト",
 };
 
