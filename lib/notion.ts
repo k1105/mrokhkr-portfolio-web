@@ -53,6 +53,7 @@ export interface NotionRichTextContent {
 export type WorkContentBlock =
   | {type: "text"; rich_text: NotionRichTextContent[]}
   | {type: "image"; url: string; caption: string}
+  | {type: "video"; url: string; caption: string}
   | {type: "divider"};
 
 // Notion API からの型定義（最小限）
@@ -245,6 +246,51 @@ export async function getWorkContent(
         content.push({
           type: "image",
           url: imageUrl,
+          caption,
+        });
+      }
+    }
+
+    // 動画ブロック（YouTube等の外部動画）
+    if (blockType === "video") {
+      const videoData = (block as Record<string, unknown>).video as {
+        type?: string;
+        external?: {url: string};
+        caption?: NotionRichTextItem[];
+      };
+
+      const videoUrl = videoData?.type === "external" ? videoData.external?.url : undefined;
+
+      const caption =
+        videoData?.caption
+          ?.map((item: NotionRichTextItem) => item.plain_text)
+          .join("") || "";
+
+      if (videoUrl) {
+        content.push({
+          type: "video",
+          url: videoUrl,
+          caption,
+        });
+      }
+    }
+
+    // 埋め込みブロック（YouTube等）
+    if (blockType === "embed") {
+      const embedData = (block as Record<string, unknown>).embed as {
+        url?: string;
+        caption?: NotionRichTextItem[];
+      };
+
+      const caption =
+        embedData?.caption
+          ?.map((item: NotionRichTextItem) => item.plain_text)
+          .join("") || "";
+
+      if (embedData?.url) {
+        content.push({
+          type: "video",
+          url: embedData.url,
           caption,
         });
       }

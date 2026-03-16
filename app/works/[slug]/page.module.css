@@ -92,6 +92,20 @@
   margin-bottom: 0;
 }
 
+.videoWrapper {
+  width: 100%;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.videoWrapper iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+
 .divider {
   height: 5rem;
   width: 100%;

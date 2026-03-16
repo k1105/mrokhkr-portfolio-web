@@ -9,6 +9,35 @@ import {
 } from "../../../lib/notion";
 import styles from "./page.module.css";
 
+function toYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    // youtube.com/watch?v=ID
+    if (
+      (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") &&
+      u.pathname === "/watch"
+    ) {
+      const v = u.searchParams.get("v");
+      return v ? `https://www.youtube.com/embed/${v}` : null;
+    }
+    // youtu.be/ID
+    if (u.hostname === "youtu.be") {
+      const id = u.pathname.slice(1);
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    // already an embed URL
+    if (
+      (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") &&
+      u.pathname.startsWith("/embed/")
+    ) {
+      return url;
+    }
+  } catch {
+    // invalid URL
+  }
+  return null;
+}
+
 interface WorkPageProps {
   params: Promise<{slug: string}>;
 }
@@ -151,6 +180,24 @@ export default async function WorkPage({params}: WorkPageProps) {
                     )}
                   </div>
                 );
+              } else if (block.type === "video") {
+                const embedUrl = toYouTubeEmbedUrl(block.url);
+                if (embedUrl) {
+                  return (
+                    <div key={index} className={styles.videoWrapper}>
+                      <iframe
+                        src={embedUrl}
+                        title={block.caption || "YouTube video"}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                      {block.caption && (
+                        <p className={`global-text-sm`}>{block.caption}</p>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
               } else if (block.type === "divider") {
                 return <div key={index} className={styles.divider} />;
               }
