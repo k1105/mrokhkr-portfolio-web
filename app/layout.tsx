@@ -41,11 +41,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ビルド時にworksを取得し、サムネイル付きのものから8件ランダムピック
+  // ビルド時にworksを取得し、サムネイル付きのものから12件ランダムピック（PC:8件、スマホ:12件）
   const works = await getWorks();
   const worksWithThumbnails = works.filter((w) => w.thumbnail);
-  const shuffled = [...worksWithThumbnails].sort(() => Math.random() - 0.5);
-  const workThumbnails: WorkThumbnail[] = shuffled.slice(0, 8).map((w) => ({
+  // slugで重複を排除
+  const uniqueWorks = Array.from(
+    new Map(worksWithThumbnails.map((w) => [w.slug, w])).values(),
+  );
+  // Fisher-Yatesシャッフル
+  const shuffled = [...uniqueWorks];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const workThumbnails: WorkThumbnail[] = shuffled.slice(0, 12).map((w) => ({
     slug: w.slug,
     thumbnail: w.thumbnail!,
   }));

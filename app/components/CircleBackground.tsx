@@ -28,7 +28,9 @@ interface Circle {
 
 const COLUMNS = 10;
 const NUM_LARGE = 5;
-const NUM_SMALL_NORMAL = 8;
+const NUM_SMALL_NORMAL_DESKTOP = 8;
+const NUM_SMALL_NORMAL_MOBILE = 12;
+const MOBILE_BREAKPOINT = 768;
 const NUM_SMALL_SPECIAL = 2;
 const SIZE_RATIO = 0.7;
 
@@ -258,7 +260,8 @@ export default function CircleBackground({
           });
         }
 
-        const thumbCount = Math.min(NUM_SMALL_NORMAL, workThumbnails.length);
+        const numSmallNormal = width < MOBILE_BREAKPOINT ? NUM_SMALL_NORMAL_MOBILE : NUM_SMALL_NORMAL_DESKTOP;
+        const thumbCount = Math.min(numSmallNormal, workThumbnails.length);
         for (let i = 0; i < thumbCount; i++) {
           circles.push({
             x: (Math.random() - 0.5) * 2,
