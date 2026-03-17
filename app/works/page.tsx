@@ -50,7 +50,7 @@ export default async function WorksPage() {
             <h2 className={`${styles.categoryTitle} global-text-md`}>
               {category.display}
             </h2>
-            <div className={styles.carousel}>
+            <div className={styles.carousel} data-lenis-prevent>
               {categoryWorks.map((work) => (
                 <TransitionLink
                   key={work.id}
