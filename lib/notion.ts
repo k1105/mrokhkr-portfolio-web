@@ -5,15 +5,11 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
-const tmpNotion = new Client({
-  auth: process.env.TMP_NOTION_TOKEN,
-});
-
 const dataSourceId = process.env.NOTION_WORKS_DATASOURCE_ID;
 const mediaArchivesDataSourceId =
   process.env.NOTION_MEDIA_ARCHIVES_DATASOURCE_ID;
 const diaryDataSourceId = process.env.NOTION_DIARY_DATASOURCE_ID;
-const contentsDataSourceId = process.env.TMP_NOTION_CONTENTS_DATASOURCE_ID;
+const contentsDataSourceId = process.env.NOTION_CONTENTS_DATASOURCE_ID;
 
 export interface NotionWork {
   id: string;
@@ -347,10 +343,10 @@ export async function getWorkContent(
 // Aboutページのコンテンツを取得（TMP Notionデータベースから）
 export async function getAboutContent(): Promise<WorkContentBlock[]> {
   if (!contentsDataSourceId) {
-    throw new Error("TMP_NOTION_CONTENTS_DATASOURCE_ID is not set");
+    throw new Error("NOTION_CONTENTS_DATASOURCE_ID is not set");
   }
 
-  const res = await tmpNotion.dataSources.query({
+  const res = await notion.dataSources.query({
     data_source_id: contentsDataSourceId,
     page_size: 100,
   });
@@ -369,7 +365,7 @@ export async function getAboutContent(): Promise<WorkContentBlock[]> {
     return [];
   }
 
-  return fetchBlockContent(tmpNotion, aboutPage.id);
+  return fetchBlockContent(notion, aboutPage.id);
 }
 
 async function fetchAllMediaArchives(): Promise<NotionMediaArchive[]> {
