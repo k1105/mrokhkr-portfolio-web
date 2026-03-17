@@ -8,18 +8,13 @@
   width: calc(var(--grid-cell) * 8);
   margin: 0 auto;
   padding-top: calc(var(--grid-cell) * 3);
+  padding-bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: 30px;
   opacity: 0;
   animation: fadeIn 0.5s ease-in forwards;
   animation-delay: 0.3s;
-}
-
-.divider {
-  border: 0.5px solid #500b28;
-  width: 100%;
-  margin: 2rem 0;
 }
 
 @keyframes fadeIn {
@@ -41,54 +36,61 @@
   object-fit: contain;
 }
 
-.profileInfo {
-  width: 100%;
-  line-height: 1.8;
-  color: #500b28;
-}
-
-.name {
+.heading {
   font-weight: normal;
   margin-bottom: 16px;
 }
 
-.nameEn {
-  font-weight: normal;
-}
-
-.profession {
-  margin-bottom: 32px;
-}
-
-.description {
-  margin-bottom: 48px;
+.textContent {
+  width: 100%;
+  line-height: 1.8;
+  color: #500b28;
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word;
 }
 
-.description p {
+.textContent p {
   margin-bottom: 8px;
 }
 
-.section {
-  margin-bottom: 48px;
+.contentImageWrapper {
+  width: 100%;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.sectionTitle {
-  font-weight: normal;
-  margin-bottom: 16px;
+.contentImage {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
-.list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.videoWrapper {
+  width: 100%;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.list li {
-  margin-bottom: 8px;
-  padding-left: 0;
+.videoWrapper iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+
+.divider {
+  border: 0.5px solid #500b28;
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.spacer {
+  height: 1.5rem;
+  width: 100%;
 }
 
 /* PC版のスタイル */
@@ -96,6 +98,7 @@
   .content {
     width: calc(var(--grid-cell) * 14);
     padding-top: calc(var(--grid-cell) * 2);
+    padding-bottom: 60px;
     flex-direction: row;
     gap: var(--grid-cell);
     align-items: flex-start;
@@ -105,33 +108,11 @@
 
   .profileImageWrapper {
     width: calc(var(--grid-cell) * 4);
-    padding-left: 0;
     flex-shrink: 0;
   }
 
-  .profileInfo {
+  .textContent {
     width: calc(var(--grid-cell) * 9);
     flex-shrink: 0;
-    padding-top: 0;
-  }
-
-  .name {
-    margin-bottom: 16px;
-  }
-
-  .description {
-    margin-bottom: 48px;
-  }
-
-  .section {
-    margin-bottom: 48px;
-  }
-
-  .sectionTitle {
-    margin-bottom: 16px;
-  }
-
-  .list li {
-    margin-bottom: 8px;
   }
 }

@@ -5,10 +5,15 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
+const tmpNotion = new Client({
+  auth: process.env.TMP_NOTION_TOKEN,
+});
+
 const dataSourceId = process.env.NOTION_WORKS_DATASOURCE_ID;
 const mediaArchivesDataSourceId =
   process.env.NOTION_MEDIA_ARCHIVES_DATASOURCE_ID;
 const diaryDataSourceId = process.env.NOTION_DIARY_DATASOURCE_ID;
+const contentsDataSourceId = process.env.TMP_NOTION_CONTENTS_DATASOURCE_ID;
 
 export interface NotionWork {
   id: string;
@@ -52,9 +57,11 @@ export interface NotionRichTextContent {
 
 export type WorkContentBlock =
   | {type: "text"; rich_text: NotionRichTextContent[]}
+  | {type: "heading"; level: 1 | 2 | 3; rich_text: NotionRichTextContent[]}
   | {type: "image"; url: string; caption: string}
   | {type: "video"; url: string; caption: string}
-  | {type: "divider"};
+  | {type: "divider"}
+  | {type: "spacer"};
 
 // Notion API からの型定義（最小限）
 interface NotionRichTextItem {
@@ -184,11 +191,11 @@ export async function getWorkById(id: string): Promise<NotionWork | null> {
   return works.find((work) => work.id === id) || null;
 }
 
-// ページのブロックからrich_textコンテンツと画像を取得
-export async function getWorkContent(
+async function fetchBlockContent(
+  client: Client,
   pageId: string,
 ): Promise<WorkContentBlock[]> {
-  const blocks = await notion.blocks.children.list({
+  const blocks = await client.blocks.children.list({
     block_id: pageId,
   });
 
@@ -197,12 +204,32 @@ export async function getWorkContent(
   for (const block of blocks.results) {
     const blockType = (block as {type?: string}).type;
 
-    // テキストブロック（段落、見出し、リストなど）
+    // 見出しブロック
     if (
-      blockType === "paragraph" ||
       blockType === "heading_1" ||
       blockType === "heading_2" ||
-      blockType === "heading_3" ||
+      blockType === "heading_3"
+    ) {
+      const blockData = (block as Record<string, unknown>)[blockType] as {
+        rich_text?: NotionRichTextItem[];
+      };
+      if (blockData?.rich_text && blockData.rich_text.length > 0) {
+        const level = (blockType === "heading_1" ? 1 : blockType === "heading_2" ? 2 : 3) as 1 | 2 | 3;
+        content.push({
+          type: "heading",
+          level,
+          rich_text: blockData.rich_text.map((item) => ({
+            plain_text: item.plain_text,
+            href: item.href,
+            annotations: item.annotations,
+          })),
+        });
+      }
+    }
+
+    // テキストブロック（段落、リストなど）
+    if (
+      blockType === "paragraph" ||
       blockType === "bulleted_list_item" ||
       blockType === "numbered_list_item" ||
       blockType === "quote" ||
@@ -220,6 +247,9 @@ export async function getWorkContent(
             annotations: item.annotations,
           })),
         });
+      } else if (blockType === "paragraph") {
+        // 空の段落ブロックはスペーサーとして扱う
+        content.push({type: "spacer"});
       }
     }
 
@@ -305,6 +335,41 @@ export async function getWorkContent(
   }
 
   return content;
+}
+
+// ページのブロックからrich_textコンテンツと画像を取得
+export async function getWorkContent(
+  pageId: string,
+): Promise<WorkContentBlock[]> {
+  return fetchBlockContent(notion, pageId);
+}
+
+// Aboutページのコンテンツを取得（TMP Notionデータベースから）
+export async function getAboutContent(): Promise<WorkContentBlock[]> {
+  if (!contentsDataSourceId) {
+    throw new Error("TMP_NOTION_CONTENTS_DATASOURCE_ID is not set");
+  }
+
+  const res = await tmpNotion.dataSources.query({
+    data_source_id: contentsDataSourceId,
+    page_size: 100,
+  });
+
+  const pages = res.results.filter(isFullPage);
+  const aboutPage = pages.find((page) => {
+    const nameProperty = page.properties.Name || page.properties.name;
+    if (nameProperty?.type !== "title") return false;
+    const name = nameProperty.title
+      .map((t: {plain_text: string}) => t.plain_text)
+      .join("");
+    return name === "About";
+  });
+
+  if (!aboutPage) {
+    return [];
+  }
+
+  return fetchBlockContent(tmpNotion, aboutPage.id);
 }
 
 async function fetchAllMediaArchives(): Promise<NotionMediaArchive[]> {

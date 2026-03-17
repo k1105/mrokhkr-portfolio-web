@@ -74,6 +74,11 @@
   margin-bottom: 8px;
 }
 
+.heading {
+  font-weight: normal;
+  margin-bottom: 16px;
+}
+
 .contentImageWrapper {
   width: 100%;
   margin-bottom: 2rem;
@@ -107,7 +112,14 @@
 }
 
 .divider {
-  height: 5rem;
+  width: 100%;
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 1rem 0;
+}
+
+.spacer {
+  height: 3rem;
   width: 100%;
 }
 

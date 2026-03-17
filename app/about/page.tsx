@@ -1,9 +1,72 @@
-"use client";
-
 import Image from "next/image";
+import React from "react";
+import {getAboutContent, NotionRichTextContent} from "../../lib/notion";
 import styles from "./page.module.css";
 
-export default function About() {
+function toYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (
+      (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") &&
+      u.pathname === "/watch"
+    ) {
+      const v = u.searchParams.get("v");
+      return v ? `https://www.youtube.com/embed/${v}` : null;
+    }
+    if (u.hostname === "youtu.be") {
+      const id = u.pathname.slice(1);
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (
+      (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") &&
+      u.pathname.startsWith("/embed/")
+    ) {
+      return url;
+    }
+  } catch {
+    // invalid URL
+  }
+  return null;
+}
+
+function renderRichText(richText: NotionRichTextContent[]) {
+  return richText.map((item, index) => {
+    const {plain_text, href, annotations} = item;
+    let content: React.ReactNode = plain_text;
+
+    if (annotations) {
+      if (annotations.bold) {
+        content = <strong>{content}</strong>;
+      }
+      if (annotations.italic) {
+        content = <em>{content}</em>;
+      }
+      if (annotations.strikethrough) {
+        content = <s>{content}</s>;
+      }
+      if (annotations.underline) {
+        content = <u>{content}</u>;
+      }
+      if (annotations.code) {
+        content = <code>{content}</code>;
+      }
+    }
+
+    if (href) {
+      return (
+        <a key={index} href={href} target="_blank" rel="noopener noreferrer">
+          {content}
+        </a>
+      );
+    }
+
+    return <React.Fragment key={index}>{content}</React.Fragment>;
+  });
+}
+
+export default async function About() {
+  const content = await getAboutContent();
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -17,51 +80,61 @@ export default function About() {
             priority
           />
         </div>
-        <div className={`${styles.profileInfo} global-text-md`}>
-          <h1 className={`${styles.name} global-text-lg`}>
-            村岡光 <span className={styles.nameEn}>Muraoka Hikaru</span>
-          </h1>
-          <p className={`${styles.profession} global-text-md`}>
-            グラフィックデザイナー/ワークショップデザイナー
-          </p>
-
-          <div className={styles.description}>
-            <p className={`global-text-md`}>
-              企業でデザイナーとして働きながら、フリーランスやNPO（一般社団法人）での個人活動も行っています。
-            </p>
-            <p className={`global-text-md`}>
-              最近は、他者との関係性や対話、場づくりに関心があり、視覚表現や体験設計、言葉の編集など、これまでのデザインの実践を手がかりに探究しています。
-            </p>
-          </div>
-          <hr className={styles.divider} />
-
-          <section className={styles.section}>
-            <h2 className={`${styles.sectionTitle} global-text-lg`}>
-              略歴 Biography
-            </h2>
-            <ul className={`${styles.list} global-text-md`}>
-              <li>1999年 宮城県うまれ</li>
-              <li>2022年 東北芸術工科大学グラフィックデザイン学科 卒業</li>
-              <li>2022年~ 株式会社東芝 DX・デザイン & コミュニケーション部</li>
-              <li>2024年~ 一般社団法人 NO YOUTH NO JAPAN デザインチーム</li>
-            </ul>
-          </section>
-          <hr className={styles.divider} />
-          <section className={styles.section}>
-            <h2 className={`${styles.sectionTitle} global-text-lg`}>
-              受賞歴 Awards
-            </h2>
-            <ul className={`${styles.list} global-text-md`}>
-              <li>2020年 Adobe CCJ UIUX デザインコンペ 最優秀賞</li>
-              <li>2020年 総務省統計局 統計グラフコンクール入選</li>
-              <li>
-                2022年 東北芸術工科大学グラフィックデザイン学科 卒業制作展
-                最優秀賞
-              </li>
-              <li>2022年 CHINA NEW ONE AWARD ファイナリスト</li>
-              <li>2022年 GOOD DESIGN NEW HOPE AWARD 入賞</li>
-            </ul>
-          </section>
+        <div className={styles.textContent}>
+          {content.map((block, index) => {
+            if (block.type === "heading") {
+              const Tag = `h${block.level}` as "h1" | "h2" | "h3";
+              return (
+                <Tag className={`${styles.heading} global-text-lg`} key={index}>
+                  {renderRichText(block.rich_text)}
+                </Tag>
+              );
+            } else if (block.type === "text") {
+              return (
+                <p className="global-text-md" key={index}>
+                  {renderRichText(block.rich_text)}
+                </p>
+              );
+            } else if (block.type === "image") {
+              return (
+                <div key={index} className={styles.contentImageWrapper}>
+                  <Image
+                    src={block.url}
+                    alt={block.caption || ""}
+                    width={600}
+                    height={400}
+                    className={styles.contentImage}
+                  />
+                  {block.caption && (
+                    <p className="global-text-sm">{block.caption}</p>
+                  )}
+                </div>
+              );
+            } else if (block.type === "video") {
+              const embedUrl = toYouTubeEmbedUrl(block.url);
+              if (embedUrl) {
+                return (
+                  <div key={index} className={styles.videoWrapper}>
+                    <iframe
+                      src={embedUrl}
+                      title={block.caption || "YouTube video"}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                    {block.caption && (
+                      <p className="global-text-sm">{block.caption}</p>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            } else if (block.type === "divider") {
+              return <hr key={index} className={styles.divider} />;
+            } else if (block.type === "spacer") {
+              return <div key={index} className={styles.spacer} />;
+            }
+            return null;
+          })}
         </div>
       </div>
     </div>

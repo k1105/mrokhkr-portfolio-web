@@ -127,7 +127,14 @@ export default async function DiaryDetailPage({params}: DiaryPageProps) {
 
           <div className={styles.textContent}>
             {content.map((block, index) => {
-              if (block.type === "text") {
+              if (block.type === "heading") {
+                const Tag = `h${block.level}` as "h1" | "h2" | "h3";
+                return (
+                  <Tag className={`${styles.heading} global-text-lg`} key={index}>
+                    {renderRichText(block.rich_text)}
+                  </Tag>
+                );
+              } else if (block.type === "text") {
                 return <p className="global-text-md" key={index}>{renderRichText(block.rich_text)}</p>;
               } else if (block.type === "image") {
                 return (
@@ -163,7 +170,9 @@ export default async function DiaryDetailPage({params}: DiaryPageProps) {
                 }
                 return null;
               } else if (block.type === "divider") {
-                return <div key={index} className={styles.divider} />;
+                return <hr key={index} className={styles.divider} />;
+              } else if (block.type === "spacer") {
+                return <div key={index} className={styles.spacer} />;
               }
               return null;
             })}
