@@ -28,8 +28,20 @@ const zenKakuGothicNew = Zen_Kaku_Gothic_New({
 import type {Viewport} from "next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hikarumuraoka.com"),
   title: "Design Project of Hikaru Muraoka",
   description: "村岡 光のポートフォリオサイト",
+  openGraph: {
+    title: "Design Project of Hikaru Muraoka",
+    description: "村岡 光のポートフォリオサイト",
+    images: ["/ogp.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Design Project of Hikaru Muraoka",
+    description: "村岡 光のポートフォリオサイト",
+    images: ["/ogp.png"],
+  },
 };
 
 export const viewport: Viewport = {
