@@ -30,16 +30,16 @@ import type {Viewport} from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://hikarumuraoka.com"),
   title: "Design Project of Hikaru Muraoka",
-  description: "村岡 光のポートフォリオサイト",
+  description: "村岡光のデザインプロジェクト",
   openGraph: {
     title: "Design Project of Hikaru Muraoka",
-    description: "村岡 光のポートフォリオサイト",
+    description: "村岡光のデザインプロジェクト",
     images: ["/ogp.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Design Project of Hikaru Muraoka",
-    description: "村岡 光のポートフォリオサイト",
+    description: "村岡光のデザインプロジェクト",
     images: ["/ogp.png"],
   },
 };
