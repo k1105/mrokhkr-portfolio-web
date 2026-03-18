@@ -53,7 +53,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ビルド時にworks・diaryを取得し、サムネイル付きのものから12件ランダムピック（PC:8件、スマホ:12件）
+  // ビルド時にworks・diaryを取得し、サムネイル付きのものから12件ランダムピック
   const [works, diaries] = await Promise.all([getWorks(), getDiaries()]);
 
   // サムネイル付きのコンテンツを統合（slugで重複排除）
