@@ -5,7 +5,7 @@ import {usePathname, useRouter} from "next/navigation";
 
 declare global {
   interface Window {
-    __transitionCenters?: Record<string, {x: number; y: number}>;
+    __transitionCenters?: Record<string, {x: number; y: number; r?: number}>;
   }
 }
 
@@ -19,7 +19,7 @@ export default function PageTransitionOverlay() {
   const animFrameRef = useRef<number | null>(null);
   const phaseRef = useRef<Phase>("idle");
   const bgColorRef = useRef<string>("transparent");
-  const centerRef = useRef<{x: number; y: number}>({x: 0, y: 0});
+  const centerRef = useRef<{x: number; y: number; r: number}>({x: 0, y: 0, r: 0});
   const targetHrefRef = useRef<string>("");
   const targetPathnameRef = useRef<string>("");
 
@@ -56,7 +56,7 @@ export default function PageTransitionOverlay() {
 
       phaseRef.current = "forward-expand";
       bgColorRef.current = bgColor;
-      centerRef.current = {x, y};
+      centerRef.current = {x, y, r: 0};
       targetHrefRef.current = href;
       try {
         const url = new URL(href, window.location.origin);
@@ -160,10 +160,11 @@ export default function PageTransitionOverlay() {
       const stored = centers[pathname];
       const cx = stored ? stored.x : window.innerWidth / 2;
       const cy = stored ? stored.y : window.innerHeight / 2;
+      const cr = stored?.r ?? 0;
 
       phaseRef.current = "back-fadein";
       bgColorRef.current = bgColor;
-      centerRef.current = {x: cx, y: cy};
+      centerRef.current = {x: cx, y: cy, r: cr};
       targetHrefRef.current = href;
       try {
         const url = new URL(href, window.location.origin);
@@ -247,10 +248,12 @@ export default function PageTransitionOverlay() {
       return;
     }
 
-    // Set up circle clip at full size, then shrink to 0
+    // Set up circle clip at full size, then shrink to nav circle radius
     const maxRadius = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
     const cx = centerRef.current.x;
     const cy = centerRef.current.y;
+    // 円の表示サイズ: r * 2 * 0.95 の半径 = r * 0.95
+    const minRadius = centerRef.current.r * 0.95;
     const duration = 800;
 
     el.style.transition = "none";
@@ -264,14 +267,15 @@ export default function PageTransitionOverlay() {
       const progress = Math.min(elapsed / duration, 1);
       // ease-in: slow start, fast end
       const eased = progress * progress;
-      const radius = maxRadius * (1 - eased);
+      const radius = maxRadius + (minRadius - maxRadius) * eased;
 
       el.style.clipPath = `circle(${radius}px at ${cx}px ${cy}px)`;
 
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
-        el.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
+        el.style.clipPath = `circle(${minRadius}px at ${cx}px ${cy}px)`;
+        window.dispatchEvent(new CustomEvent("page-transition-back-complete"));
         cleanup();
       }
     };

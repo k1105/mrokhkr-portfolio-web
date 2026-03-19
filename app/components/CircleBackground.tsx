@@ -115,6 +115,7 @@ export default function CircleBackground({
   const [gradientVisible, setGradientVisible] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [imagesReady, setImagesReady] = useState(false);
+  const [isBackTransition, setIsBackTransition] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -123,6 +124,8 @@ export default function CircleBackground({
   const circlesRef = useRef<Circle[]>([]);
   const isInitializedRef = useRef(false);
   const animationCompletedRef = useRef(false);
+  // 浮遊circle用: 元circleのDOM要素refを保持し、回転角を直接読み取る
+  const circleElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   // 現在のパスに基づいてactiveな円のインデックスを取得
   const getActiveCircleIndex = (): number | null => {
@@ -388,17 +391,18 @@ export default function CircleBackground({
 
   // ★修正: 粘性と生命感のある登場アニメーション
   useEffect(() => {
-    if (!mounted || circles.length === 0 || !imagesReady || animationCompletedRef.current) {
+    if (
+      !mounted ||
+      circles.length === 0 ||
+      !imagesReady ||
+      animationCompletedRef.current
+    ) {
       if (animationCompletedRef.current && circles.length > 0) {
         setCircleScales(new Array(circles.length).fill(1.0));
       }
       return;
     }
 
-    // ★Easingの変更: Viscous Pop (粘性のあるポップ)
-    // easeOutBackをベースに調整。
-    // 細胞分裂のように「ググッと広がって、少し行き過ぎて(1.05)、ゆっくり戻る」動き。
-    // 振動（Elastic）のような不安定さを排除。
     const viscousPop = (x: number): number => {
       const c1 = 1.2; // オーバーシュート量（小さいほど控えめな膨らみ）
       const c3 = c1 + 1;
@@ -417,8 +421,6 @@ export default function CircleBackground({
       let allFinished = true;
 
       const newScales = circles.map((circle) => {
-        // 事前に割り振ったランダムな遅延と時間を使用
-        // これにより「波」ではなく「あちこちから湧き出る」動きになる
         const delay = circle.animDelay || 0;
         const duration = circle.animDuration || 1.2;
 
@@ -455,11 +457,12 @@ export default function CircleBackground({
   useEffect(() => {
     if (isActive) {
       setClipProgress(1);
-      if (clickedNav !== null) {
+      // back遷移中はclickedNavを維持する（overlayの上に円を表示し続けるため）
+      if (clickedNav !== null && !isBackTransitionRef.current) {
         setClickedNav(null);
       }
     } else if (pathname === "/") {
-      if (clickedNav === null) {
+      if (clickedNav === null || isBackTransitionRef.current) {
         setClipProgress(0);
       }
     }
@@ -490,10 +493,14 @@ export default function CircleBackground({
   useEffect(() => {
     if (!isActive || activeCircleIndex === null) return;
     const currentCircles = circlesRef.current;
-    if (currentCircles.length === 0 || activeCircleIndex >= currentCircles.length) return;
+    if (
+      currentCircles.length === 0 ||
+      activeCircleIndex >= currentCircles.length
+    )
+      return;
     const circle = currentCircles[activeCircleIndex];
     if (!window.__transitionCenters) window.__transitionCenters = {};
-    window.__transitionCenters[pathname] = {x: circle.x, y: circle.y};
+    window.__transitionCenters[pathname] = {x: circle.x, y: circle.y, r: circle.r};
   }, [isActive, activeCircleIndex, pathname]);
 
   // page-transition-navigate イベントを受信（詳細ページ遷移時）
@@ -502,15 +509,59 @@ export default function CircleBackground({
       navigatedViaCircleRef.current = true;
       setGradientVisible(false);
     };
-    window.addEventListener("page-transition-navigate", handleTransitionNavigate);
+    window.addEventListener(
+      "page-transition-navigate",
+      handleTransitionNavigate,
+    );
     return () => {
-      window.removeEventListener("page-transition-navigate", handleTransitionNavigate);
+      window.removeEventListener(
+        "page-transition-navigate",
+        handleTransitionNavigate,
+      );
     };
   }, []);
 
-  // クリック遷移アニメーション
+  // 戻りトランジション管理
+  // - back開始時: clickedNav + isBackTransition を即座にセット
+  // - shrink完了後（complete）: 全リセット
+  // Note: containerのzIndexは変更しない。代わりに浮遊レイヤーでcircleを描画。
+  const activeCircleIndexRef = useRef<number | null>(null);
+  activeCircleIndexRef.current = activeCircleIndex;
+  const isBackTransitionRef = useRef(false);
+
   useEffect(() => {
-    if (pathname !== "/" || clickedNav === null) return;
+    const handleBackStart = () => {
+      const idx = activeCircleIndexRef.current;
+      if (idx !== null) {
+        isBackTransitionRef.current = true;
+        setClickedNav(idx);
+        setIsBackTransition(true);
+      }
+    };
+    const handleBackComplete = () => {
+      isBackTransitionRef.current = false;
+      setClickedNav(null);
+      setClipProgress(0);
+      setIsBackTransition(false);
+    };
+    window.addEventListener("page-transition-back", handleBackStart);
+    window.addEventListener(
+      "page-transition-back-complete",
+      handleBackComplete,
+    );
+    return () => {
+      window.removeEventListener("page-transition-back", handleBackStart);
+      window.removeEventListener(
+        "page-transition-back-complete",
+        handleBackComplete,
+      );
+    };
+  }, []);
+
+  // クリック遷移アニメーション（forward遷移のみ。back遷移時はスキップ）
+  useEffect(() => {
+    if (pathname !== "/" || clickedNav === null || isBackTransitionRef.current)
+      return;
 
     const currentCircles = circlesRef.current;
     if (currentCircles.length === 0 || clickedNav >= currentCircles.length)
@@ -568,7 +619,7 @@ export default function CircleBackground({
 
     // Store center for back navigation
     if (!window.__transitionCenters) window.__transitionCenters = {};
-    window.__transitionCenters[href] = {x: circle.x, y: circle.y};
+    window.__transitionCenters[href] = {x: circle.x, y: circle.y, r: circle.r};
 
     navigatedViaCircleRef.current = true;
     setGradientVisible(false);
@@ -586,7 +637,8 @@ export default function CircleBackground({
     );
   }
 
-  const showLoading = pathname === "/" && !imagesReady && !animationCompletedRef.current;
+  const showLoading =
+    pathname === "/" && !imagesReady && !animationCompletedRef.current;
 
   const getClipPath = (circle: Circle | null) => {
     if (!circle || typeof window === "undefined") return "none";
@@ -618,6 +670,7 @@ export default function CircleBackground({
   const shouldShowBackground = displayCircle || pathBackgroundColor;
 
   return (
+    <>
     <div
       ref={containerRef}
       className={styles.container}
@@ -751,9 +804,10 @@ export default function CircleBackground({
                 height: `${size}px`,
                 clipPath: "ellipse(50% 50.625% at center)",
                 overflow: "hidden",
-                backgroundColor: gradientVisible
-                  ? "transparent"
-                  : "var(--purple-background)",
+                backgroundColor:
+                  gradientVisible || isBackTransition
+                    ? "transparent"
+                    : "var(--purple-background)",
                 cursor:
                   externalHref && pathname === "/" ? "pointer" : "default",
                 ["--initial-rotation" as string]: `${initialRotation}deg`,
@@ -802,15 +856,20 @@ export default function CircleBackground({
 
           const circleContent = (
             <div
+              ref={(el) => {
+                if (el) circleElementRefs.current.set(index, el);
+                else circleElementRefs.current.delete(index);
+              }}
               className={rotationClass}
               style={{
                 width: `${size}px`,
                 height: `${size}px`,
                 clipPath: "ellipse(50% 50.625% at center)",
                 overflow: "hidden",
-                backgroundColor: gradientVisible
-                  ? "transparent"
-                  : backgroundColor,
+                backgroundColor:
+                  gradientVisible || isBackTransition
+                    ? "transparent"
+                    : backgroundColor,
                 cursor: href && pathname === "/" ? "pointer" : "default",
                 opacity: isHidden ? 0 : 1,
                 transition: "opacity 0.2s",
@@ -898,5 +957,67 @@ export default function CircleBackground({
         }
       })}
     </div>
+
+    {/* back遷移中、clickedNavの円をoverlay(zIndex:10)より上に浮遊描画 */}
+    {isBackTransition && clickedNav !== null && circles[clickedNav] && (() => {
+      const circle = circles[clickedNav];
+      const size = circle.r * 2 * 0.95;
+      const rotationClass =
+        (circle.rotationDirection || "clockwise") === "clockwise"
+          ? styles.circleMask
+          : styles.circleMaskCounterClockwise;
+      // 元のDOM要素から現在のtransform matrixを読み取り、回転角を抽出
+      const origEl = circleElementRefs.current.get(clickedNav);
+      let currentDeg = circle.initialRotation || 0;
+      if (origEl) {
+        const cs = getComputedStyle(origEl);
+        const m = cs.transform;
+        if (m && m !== "none") {
+          // matrix(a, b, c, d, tx, ty) → angle = atan2(b, a)
+          const vals = m.match(/matrix\((.+)\)/)?.[1].split(",").map(Number);
+          if (vals && vals.length >= 2) {
+            currentDeg = Math.atan2(vals[1], vals[0]) * (180 / Math.PI);
+          }
+        }
+      }
+      return (
+        <div
+          style={{
+            position: "fixed",
+            left: `${circle.x}px`,
+            top: `${circle.y}px`,
+            transform: "translate(-50%, -50%)",
+            zIndex: 11,
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            className={rotationClass}
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              clipPath: "ellipse(50% 50.625% at center)",
+              overflow: "hidden",
+              backgroundColor: "transparent",
+              transformOrigin: "center center",
+              ["--initial-rotation" as string]: `${currentDeg}deg`,
+            }}
+          >
+            <Image
+              src={circle.imagePath || ""}
+              alt=""
+              width={size}
+              height={size}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+        </div>
+      );
+    })()}
+    </>
   );
 }
