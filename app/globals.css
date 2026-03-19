@@ -93,12 +93,12 @@ a {
     font-size: 0.9rem;
   }
   .global-text-md {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     line-height: 1.5;
     letter-spacing: -0.01em;
   }
   .global-text-sm {
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     line-height: 1.2;
   }
   .global-text-xs {
