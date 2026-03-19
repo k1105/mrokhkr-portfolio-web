@@ -3,8 +3,12 @@
 import {useEffect} from "react";
 import Lenis from "lenis";
 
+const isMobile = () => window.matchMedia("(max-width: 768px)").matches;
+
 export default function SmoothScroll() {
   useEffect(() => {
+    if (isMobile()) return;
+
     const lenis = new Lenis({
       lerp: 0.1,
       wheelMultiplier: 0.8,
