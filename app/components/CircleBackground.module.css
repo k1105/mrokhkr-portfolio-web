@@ -37,3 +37,20 @@
   inset: 0;
   pointer-events: none;
 }
+
+.loadingOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.loadingText {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--primary-color);
+  font-family: var(--font-inter), sans-serif;
+}

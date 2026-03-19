@@ -113,6 +113,8 @@ export default function CircleBackground({
   const [clickedNav, setClickedNav] = useState<number | null>(null);
   const [clipProgress, setClipProgress] = useState(0);
   const [gradientVisible, setGradientVisible] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [imagesReady, setImagesReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -345,9 +347,48 @@ export default function CircleBackground({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 画像プリロード: 全画像の読み込み進捗を追跡
+  useEffect(() => {
+    if (!mounted || circles.length === 0) return;
+    // ホームページ以外、またはアニメーション完了済みならスキップ
+    if (pathname !== "/" || animationCompletedRef.current) {
+      setImagesReady(true);
+      setLoadingProgress(100);
+      return;
+    }
+
+    const imageUrls = circles
+      .map((c) => c.imagePath)
+      .filter((src): src is string => !!src);
+
+    if (imageUrls.length === 0) {
+      setImagesReady(true);
+      setLoadingProgress(100);
+      return;
+    }
+
+    let loadedCount = 0;
+    const total = imageUrls.length;
+
+    const onLoad = () => {
+      loadedCount++;
+      setLoadingProgress(Math.round((loadedCount / total) * 100));
+      if (loadedCount >= total) {
+        setImagesReady(true);
+      }
+    };
+
+    for (const url of imageUrls) {
+      const img = new window.Image();
+      img.onload = onLoad;
+      img.onerror = onLoad; // エラーでもカウントして進行を止めない
+      img.src = url;
+    }
+  }, [mounted, circles, pathname]);
+
   // ★修正: 粘性と生命感のある登場アニメーション
   useEffect(() => {
-    if (!mounted || circles.length === 0 || animationCompletedRef.current) {
+    if (!mounted || circles.length === 0 || !imagesReady || animationCompletedRef.current) {
       if (animationCompletedRef.current && circles.length > 0) {
         setCircleScales(new Array(circles.length).fill(1.0));
       }
@@ -408,7 +449,7 @@ export default function CircleBackground({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [mounted, circles]);
+  }, [mounted, circles, imagesReady]);
 
   // パス変更監視
   useEffect(() => {
@@ -545,6 +586,8 @@ export default function CircleBackground({
     );
   }
 
+  const showLoading = pathname === "/" && !imagesReady && !animationCompletedRef.current;
+
   const getClipPath = (circle: Circle | null) => {
     if (!circle || typeof window === "undefined") return "none";
     const size = circle.r * 2 * 0.95;
@@ -655,6 +698,13 @@ export default function CircleBackground({
             }}
           />
         </>
+      )}
+
+      {/* ローディングプログレス */}
+      {showLoading && (
+        <div className={styles.loadingOverlay}>
+          <span className={styles.loadingText}>{loadingProgress}%</span>
+        </div>
       )}
 
       {circles.map((circle, index) => {
