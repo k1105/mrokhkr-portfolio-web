@@ -105,6 +105,14 @@
   margin-bottom: 0;
 }
 
+.carouselContainer {
+  position: relative;
+}
+
+.carouselButton {
+  display: none;
+}
+
 /* PC版のスタイル */
 @media (min-width: 768px) {
   .content {
@@ -127,6 +135,20 @@
     padding-right: calc((100vw - var(--grid-cell) * 14) / 2);
     margin-left: calc(-1 * (100vw - var(--grid-cell) * 14) / 2);
     margin-right: calc(-1 * (100vw - var(--grid-cell) * 14) / 2);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black calc(var(--grid-cell) * 2),
+      black calc(100% - var(--grid-cell) * 2),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black calc(var(--grid-cell) * 2),
+      black calc(100% - var(--grid-cell) * 2),
+      transparent
+    );
   }
 
   .imageWrapper {
@@ -135,5 +157,28 @@
 
   .textContent {
     max-width: 100%;
+  }
+
+  .carouselButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: calc(var(--grid-cell) * 1.5);
+    transform: translateY(-50%);
+    z-index: 2;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 2rem;
+    color: var(--yellow-background);
+  }
+
+  .carouselButtonLeft {
+    left: calc(var(--grid-cell) * 2 - (100vw - var(--grid-cell) * 14) / 2);
+  }
+
+  .carouselButtonRight {
+    right: calc(var(--grid-cell) * 2 - (100vw - var(--grid-cell) * 14) / 2);
   }
 }

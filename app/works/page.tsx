@@ -3,6 +3,7 @@ import {getWorks} from "../../lib/notion";
 import styles from "./page.module.css";
 import FadeText from "./FadeText";
 import TransitionLink from "../components/TransitionLink";
+import HorizontalScrollCarousel from "./HorizontalScrollCarousel";
 
 interface CategoryInfo {
   param: string;
@@ -50,7 +51,7 @@ export default async function WorksPage() {
             <h2 className={`${styles.categoryTitle} global-text-md`}>
               {category.display}
             </h2>
-            <div className={styles.carousel} data-lenis-prevent>
+            <HorizontalScrollCarousel className={styles.carousel} data-lenis-prevent>
               {categoryWorks.map((work) => (
                 <TransitionLink
                   key={work.id}
@@ -76,7 +77,7 @@ export default async function WorksPage() {
                   </FadeText>
                 </TransitionLink>
               ))}
-            </div>
+            </HorizontalScrollCarousel>
           </section>
         ))}
       </div>
