@@ -116,6 +116,7 @@ export default function CircleBackground({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [imagesReady, setImagesReady] = useState(false);
   const [isBackTransition, setIsBackTransition] = useState(false);
+  const [activeScaleMultiplier, setActiveScaleMultiplier] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -141,6 +142,83 @@ export default function CircleBackground({
 
   const activeCircleIndex = getActiveCircleIndex();
   const isActive = activeCircleIndex !== null;
+
+  // activeCircleのスケール倍率をアニメーション（1.0 <-> 1.5）
+  const activeScaleAnimRef = useRef<number | null>(null);
+  const backEventDetailRef = useRef<CustomEvent | null>(null);
+  const initialScaleSetRef = useRef(false);
+
+  // 個別ページから直接ロードされた場合、初期値を1.5にセット
+  useEffect(() => {
+    if (isActive && !initialScaleSetRef.current) {
+      initialScaleSetRef.current = true;
+      setActiveScaleMultiplier(1.5);
+    }
+  }, [isActive]);
+
+  // Forward: navクリック時に1.0→1.5の拡大アニメーションを開始
+  const startScaleUpAnimation = () => {
+    if (activeScaleAnimRef.current) cancelAnimationFrame(activeScaleAnimRef.current);
+    const start = 1.0;
+    const target = 1.5;
+    const duration = 600;
+    const startTime = performance.now();
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const eased = t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      setActiveScaleMultiplier(start + (target - start) * eased);
+      if (t < 1) {
+        activeScaleAnimRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    activeScaleAnimRef.current = requestAnimationFrame(animate);
+  };
+
+  // Back: page-transition-backを受けて1.5→1.0に縮小し、完了後にpage-transition-back-readyを発火
+  useEffect(() => {
+    const handleBackScale = (e: Event) => {
+      backEventDetailRef.current = e as CustomEvent;
+      const start = 1.5;
+      const target = 1.0;
+      const duration = 600;
+      const startTime = performance.now();
+
+      const animate = (now: number) => {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        const eased = t < 0.5
+          ? 4 * t * t * t
+          : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const current = start + (target - start) * eased;
+        setActiveScaleMultiplier(current);
+        if (t < 1) {
+          activeScaleAnimRef.current = requestAnimationFrame(animate);
+        } else {
+          // 縮小完了 → 従来のback処理を開始
+          const detail = backEventDetailRef.current
+            ? (backEventDetailRef.current as CustomEvent).detail
+            : {};
+          window.dispatchEvent(
+            new CustomEvent("page-transition-back-ready", {detail}),
+          );
+          backEventDetailRef.current = null;
+        }
+      };
+
+      activeScaleAnimRef.current = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("page-transition-back", handleBackScale);
+    return () => {
+      window.removeEventListener("page-transition-back", handleBackScale);
+      if (activeScaleAnimRef.current) cancelAnimationFrame(activeScaleAnimRef.current);
+    };
+  }, []);
 
   // 円の生成（初期化）
   useEffect(() => {
@@ -544,13 +622,13 @@ export default function CircleBackground({
       setClipProgress(0);
       setIsBackTransition(false);
     };
-    window.addEventListener("page-transition-back", handleBackStart);
+    window.addEventListener("page-transition-back-ready", handleBackStart);
     window.addEventListener(
       "page-transition-back-complete",
       handleBackComplete,
     );
     return () => {
-      window.removeEventListener("page-transition-back", handleBackStart);
+      window.removeEventListener("page-transition-back-ready", handleBackStart);
       window.removeEventListener(
         "page-transition-back-complete",
         handleBackComplete,
@@ -625,6 +703,7 @@ export default function CircleBackground({
     setGradientVisible(false);
     setClickedNav(index);
     setClipProgress(0);
+    startScaleUpAnimation();
   };
 
   if (!mounted) {
@@ -764,7 +843,9 @@ export default function CircleBackground({
         const size = circle.r * 2 * 0.95;
         const initialRotation = circle.initialRotation || 0;
         const rotationDirection = circle.rotationDirection || "clockwise";
-        const scale = circleScales[index] ?? 0;
+        const baseScale = circleScales[index] ?? 0;
+        const isScaleTarget = activeCircleIndex === index || clickedNav === index;
+        const scale = isScaleTarget ? baseScale * activeScaleMultiplier : baseScale;
 
         // will-changeでブラウザに最適化を促しつつ、
         // アニメーションをtransformのみに限定して描画負荷を下げる
