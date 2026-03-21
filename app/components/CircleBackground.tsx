@@ -127,7 +127,8 @@ export default function CircleBackground({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [imagesReady, setImagesReady] = useState(false);
   const [isBackTransition, setIsBackTransition] = useState(false);
-  const [activeScaleMultiplier, setActiveScaleMultiplier] = useState(1);
+  const [activeScaleMultiplier, _setASM] = useState(1);
+  const setActiveScaleMultiplier = (v: number) => { console.trace("[scale]", v); _setASM(v); };
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -156,16 +157,10 @@ export default function CircleBackground({
 
   // activeCircleのスケール倍率をアニメーション（1/NAV_SCALE <-> 1.0）
   // SVGはNAV_SCALE倍で描画し、通常時は1/NAV_SCALEに縮小、アクティブ時は1.0で表示（劣化なし）
+  // 初期値1.0: 直接ロード時のフルサイズ表示に対応
+  // Forward: startScaleUpAnimation (1/NAV_SCALE → 1.0)
+  // Back: handleBackComplete (→ 1/NAV_SCALE)
   const activeScaleAnimRef = useRef<number | null>(null);
-  const initialScaleSetRef = useRef(false);
-
-  // 個別ページから直接ロードされた場合、初期値を1.0（フルサイズ）にセット
-  useEffect(() => {
-    if (isActive && !initialScaleSetRef.current) {
-      initialScaleSetRef.current = true;
-      setActiveScaleMultiplier(1.0);
-    }
-  }, [isActive]);
 
   // Forward: navクリック時に1/NAV_SCALE→1.0の拡大アニメーションを開始
   const startScaleUpAnimation = () => {
@@ -598,9 +593,9 @@ export default function CircleBackground({
 
   useEffect(() => {
     const handleBackStart = () => {
+      isBackTransitionRef.current = true;
       const idx = activeCircleIndexRef.current;
       if (idx !== null) {
-        isBackTransitionRef.current = true;
         setClickedNav(idx);
         setIsBackTransition(true);
         // 1.0→1/NAV_SCALEの縮小アニメーションを開始（円が表示された状態で）
@@ -628,6 +623,7 @@ export default function CircleBackground({
       setClickedNav(null);
       setClipProgress(0);
       setIsBackTransition(false);
+      setActiveScaleMultiplier(1 / getNavScale());
     };
     window.addEventListener("page-transition-back", handleBackStart);
     window.addEventListener(
