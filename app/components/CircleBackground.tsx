@@ -515,24 +515,21 @@ export default function CircleBackground({
   }, [pathname, isActive, clickedNav]);
 
   // グラデーション表示制御
-  // 直接ロード時: paint前に即表示（transition不要）
+  // 直接ロード時: paint前に即表示（useLayoutEffectでtransition不要）
+  // サークルクリック遷移時: paint後にrAF経由で表示（CSS transitionが発動）
   useLayoutEffect(() => {
     if (pathname === "/") {
       setGradientVisible(false);
       return;
     }
-    if (!navigatedViaCircleRef.current) {
+    if (navigatedViaCircleRef.current) {
+      navigatedViaCircleRef.current = false;
+      requestAnimationFrame(() => {
+        setGradientVisible(true);
+      });
+    } else {
       setGradientVisible(true);
     }
-  }, [pathname]);
-
-  // サークルクリック遷移時: paint後に表示（transitionが発動）
-  useEffect(() => {
-    if (pathname === "/" || !navigatedViaCircleRef.current) return;
-    navigatedViaCircleRef.current = false;
-    requestAnimationFrame(() => {
-      setGradientVisible(true);
-    });
   }, [pathname]);
 
   // アクティブな円の中心をwindow.__transitionCentersに保存（直接ロード時のフォールバック）
