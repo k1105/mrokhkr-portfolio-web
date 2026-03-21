@@ -155,7 +155,6 @@ export default function CircleBackground({
 
   // activeCircleのスケール倍率をアニメーション（1.0 <-> NAV_SCALE）
   const activeScaleAnimRef = useRef<number | null>(null);
-  const backEventDetailRef = useRef<CustomEvent | null>(null);
   const initialScaleSetRef = useRef(false);
 
   // 個別ページから直接ロードされた場合、初期値をセット
@@ -188,20 +187,6 @@ export default function CircleBackground({
     activeScaleAnimRef.current = requestAnimationFrame(animate);
   };
 
-  // Back: page-transition-backを受けて即座にpage-transition-back-readyを発火（スケール縮小はhandleBackStartで行う）
-  useEffect(() => {
-    const handleBackScale = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {};
-      window.dispatchEvent(
-        new CustomEvent("page-transition-back-ready", {detail}),
-      );
-    };
-
-    window.addEventListener("page-transition-back", handleBackScale);
-    return () => {
-      window.removeEventListener("page-transition-back", handleBackScale);
-    };
-  }, []);
 
   // 円の生成（初期化）
   useEffect(() => {
@@ -627,13 +612,13 @@ export default function CircleBackground({
       setClipProgress(0);
       setIsBackTransition(false);
     };
-    window.addEventListener("page-transition-back-ready", handleBackStart);
+    window.addEventListener("page-transition-back", handleBackStart);
     window.addEventListener(
       "page-transition-back-complete",
       handleBackComplete,
     );
     return () => {
-      window.removeEventListener("page-transition-back-ready", handleBackStart);
+      window.removeEventListener("page-transition-back", handleBackStart);
       window.removeEventListener(
         "page-transition-back-complete",
         handleBackComplete,

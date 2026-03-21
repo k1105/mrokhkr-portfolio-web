@@ -176,8 +176,8 @@ export default function PageTransitionOverlay() {
       setActive(true);
     };
 
-    window.addEventListener("page-transition-back-ready", handleBack);
-    return () => window.removeEventListener("page-transition-back-ready", handleBack);
+    window.addEventListener("page-transition-back", handleBack);
+    return () => window.removeEventListener("page-transition-back", handleBack);
   }, [pathname]);
 
   // Back: phase 1 — fade in overlay
