@@ -154,26 +154,31 @@ export default function CircleBackground({
   const activeCircleIndex = getActiveCircleIndex();
   const isActive = activeCircleIndex !== null;
 
-  // activeCircleのスケール倍率をアニメーション（1.0 <-> NAV_SCALE）
+  // activeCircleのスケール倍率をアニメーション（1/NAV_SCALE <-> 1.0）
+  // SVGはNAV_SCALE倍で描画し、通常時は1/NAV_SCALEに縮小、アクティブ時は1.0で表示（劣化なし）
   const activeScaleAnimRef = useRef<number | null>(null);
   const initialScaleSetRef = useRef(false);
 
-  // 個別ページから直接ロードされた場合、初期値をセット
+  // 個別ページから直接ロードされた場合、初期値を1.0（フルサイズ）にセット
   useEffect(() => {
     if (isActive && !initialScaleSetRef.current) {
       initialScaleSetRef.current = true;
-      setActiveScaleMultiplier(getNavScale());
+      setActiveScaleMultiplier(1.0);
     }
   }, [isActive]);
 
-  // Forward: navクリック時に1.0→NAV_SCALEの拡大アニメーションを開始
+  // Forward: navクリック時に1/NAV_SCALE→1.0の拡大アニメーションを開始
   const startScaleUpAnimation = () => {
     if (activeScaleAnimRef.current)
       cancelAnimationFrame(activeScaleAnimRef.current);
-    const start = 1.0;
-    const target = getNavScale();
+    const navScale = getNavScale();
+    const start = 1 / navScale;
+    const target = 1.0;
     const duration = 600;
     const startTime = performance.now();
+
+    // 初期値を即座にセット（rAF前のレンダリングで通常サイズを維持）
+    setActiveScaleMultiplier(start);
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
@@ -458,13 +463,14 @@ export default function CircleBackground({
       return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
     };
 
+    const navScale = getNavScale();
     const updateWrapperTransforms = (scales: number[]) => {
       const wrappers = circleWrapperRefs.current;
       for (let i = 0; i < scales.length; i++) {
         const el = wrappers.get(i);
         if (!el) continue;
         const circle = circles[i];
-        el.style.transform = `translate(-50%, -50%) scale(${scales[i]})`;
+        el.style.transform = `translate(-50%, -50%) scale(${scales[i] / navScale})`;
         el.style.left = `${circle.x}px`;
         el.style.top = `${circle.y}px`;
       }
@@ -597,10 +603,10 @@ export default function CircleBackground({
         isBackTransitionRef.current = true;
         setClickedNav(idx);
         setIsBackTransition(true);
-        // NAV_SCALE→1.0の縮小アニメーションを開始（円が表示された状態で）
-        setActiveScaleMultiplier(getNavScale());
-        const start = getNavScale();
-        const target = 1.0;
+        // 1.0→1/NAV_SCALEの縮小アニメーションを開始（円が表示された状態で）
+        setActiveScaleMultiplier(1.0);
+        const start = 1.0;
+        const target = 1 / getNavScale();
         const duration = 600;
         const startTime = performance.now();
 
@@ -837,7 +843,8 @@ export default function CircleBackground({
         )}
 
         {circles.map((circle, index) => {
-          const size = circle.r * 2 * 0.95;
+          const navScale = getNavScale();
+          const size = circle.r * 2 * 0.95 * navScale;
           const initialRotation = circle.initialRotation || 0;
           const rotationDirection = circle.rotationDirection || "clockwise";
           const baseScale = circleScalesRef.current[index] ?? 0;
@@ -849,7 +856,7 @@ export default function CircleBackground({
             activeCircleIndex === index || clickedNav === index;
           const scale = isScaleTarget
             ? baseScale * activeScaleMultiplier
-            : baseScale;
+            : baseScale / navScale;
 
           // will-changeでブラウザに最適化を促しつつ、
           // アニメーションをtransformのみに限定して描画負荷を下げる
@@ -1059,7 +1066,7 @@ export default function CircleBackground({
         circles[clickedNav] &&
         (() => {
           const circle = circles[clickedNav];
-          const size = circle.r * 2 * 0.95;
+          const size = circle.r * 2 * 0.95 * getNavScale();
           const rotationClass =
             (circle.rotationDirection || "clockwise") === "clockwise"
               ? styles.circleMask
