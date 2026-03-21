@@ -7,8 +7,8 @@
 .content {
   width: calc(var(--grid-cell) * 8);
   margin: 0 auto;
-  padding-top: calc(var(--grid-cell) * 3);
-  padding-bottom: 20px;
+  padding-top: calc(var(--grid-cell) * 2.75);
+  padding-bottom: calc(var(--grid-cell) * 2);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -51,14 +51,14 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: calc(var(--grid-cell) * 0.5);
 }
 
 .formGroup {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.25rem;
 }
 
 .label {
@@ -69,7 +69,7 @@
 .textarea,
 .select {
   width: 100%;
-  padding: 12px;
+  padding: 6px;
   font-family: inherit;
   background-color: white;
   border: 0.75px solid #500b28;
@@ -99,7 +99,7 @@
 
 .submitButton {
   width: 100%;
-  padding: 12px;
+  padding: 6px;
   font-family: inherit;
   background-color: var(--purple-background);
   border: 0.75px solid #500b28;
@@ -170,6 +170,17 @@
   .form {
     width: 100%;
     gap: 32px;
+  }
+
+  .formGroup {
+    gap: 0.5rem;
+  }
+
+  .input,
+  .textarea,
+  .select,
+  .submitButton {
+    padding: 12px;
   }
 
   .formTitle {

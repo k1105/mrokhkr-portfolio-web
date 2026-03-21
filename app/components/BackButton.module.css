@@ -1,11 +1,11 @@
 .backButton {
   position: fixed;
   bottom: calc(var(--grid-cell) / 2);
-  left: var(--grid-cell);
+  left: calc(var(--grid-cell) * 0.5);
   z-index: 1000;
   display: block;
-  width: var(--grid-cell);
-  height: var(--grid-cell);
+  width: calc(var(--grid-cell) * 1.25);
+  height: calc(var(--grid-cell) * 1.25);
   transition: opacity 0.2s ease;
   text-decoration: none;
 }

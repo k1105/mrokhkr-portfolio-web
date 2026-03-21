@@ -53,6 +53,7 @@ export interface NotionRichTextContent {
 
 export type WorkContentBlock =
   | {type: "text"; rich_text: NotionRichTextContent[]}
+  | {type: "list_item"; rich_text: NotionRichTextContent[]}
   | {type: "heading"; level: 1 | 2 | 3; rich_text: NotionRichTextContent[]}
   | {type: "image"; url: string; caption: string}
   | {type: "video"; url: string; caption: string}
@@ -223,11 +224,29 @@ async function fetchBlockContent(
       }
     }
 
-    // テキストブロック（段落、リストなど）
+    // リストブロック
+    if (
+      blockType === "bulleted_list_item" ||
+      blockType === "numbered_list_item"
+    ) {
+      const blockData = (block as Record<string, unknown>)[blockType] as {
+        rich_text?: NotionRichTextItem[];
+      };
+      if (blockData?.rich_text && blockData.rich_text.length > 0) {
+        content.push({
+          type: "list_item",
+          rich_text: blockData.rich_text.map((item) => ({
+            plain_text: item.plain_text,
+            href: item.href,
+            annotations: item.annotations,
+          })),
+        });
+      }
+    }
+
+    // テキストブロック（段落など）
     if (
       blockType === "paragraph" ||
-      blockType === "bulleted_list_item" ||
-      blockType === "numbered_list_item" ||
       blockType === "quote" ||
       blockType === "callout"
     ) {

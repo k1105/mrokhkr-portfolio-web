@@ -6,8 +6,8 @@
 
 .content {
   width: 100%;
-  padding-top: calc(var(--grid-cell) * 3);
-  padding-bottom: 20px;
+  padding-top: calc(var(--grid-cell) * 2.75);
+  padding-bottom: calc(var(--grid-cell) * 2);
   display: flex;
   flex-direction: column;
   gap: calc(var(--grid-cell) * 1);
@@ -29,7 +29,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--grid-cell) * 0.5);
+  gap: calc(var(--grid-cell) * 0.3);
 }
 
 .categoryTitle {
@@ -42,7 +42,7 @@
   display: flex;
   flex-direction: row;
   overflow-x: auto;
-  gap: calc(var(--grid-cell) * 0.5);
+  gap: calc(var(--grid-cell) * 0.3);
   padding-left: calc(var(--grid-cell) * 1);
   padding-right: calc(var(--grid-cell) * 1);
   scrollbar-width: none;
@@ -56,7 +56,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--grid-cell) * 0.125);
+  gap: calc(var(--grid-cell) * 0.25);
   text-decoration: none;
   color: inherit;
   cursor: pointer;
@@ -137,18 +137,22 @@
     margin-right: calc(-1 * (100vw - var(--grid-cell) * 14) / 2);
     mask-image: linear-gradient(
       to right,
-      transparent,
-      black calc(var(--grid-cell) * 2),
-      black calc(100% - var(--grid-cell) * 2),
-      transparent
+      rgb(0 0 0 / 30%),
+      black calc(var(--grid-cell) * 1.5),
+      black calc(100% - var(--grid-cell) * 1.5),
+      rgb(0 0 0 / 30%)
     );
     -webkit-mask-image: linear-gradient(
       to right,
-      transparent,
-      black calc(var(--grid-cell) * 2),
-      black calc(100% - var(--grid-cell) * 2),
-      transparent
+      rgb(0 0 0 / 30%),
+      black calc(var(--grid-cell) * 1.5),
+      black calc(100% - var(--grid-cell) * 1.5),
+      rgb(0 0 0 / 30%)
     );
+  }
+
+  .imageItem {
+    gap: calc(var(--grid-cell) * 0.125);
   }
 
   .imageWrapper {

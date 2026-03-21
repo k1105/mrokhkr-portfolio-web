@@ -98,6 +98,16 @@ const getBackgroundColor = (imagePath: string | undefined): string => {
   return "transparent";
 };
 
+// ナビゲーションクリック時の拡大倍率（SP / PC）
+const NAV_SCALE_SP = 2.5;
+const NAV_SCALE_PC = 1.5;
+const BREAKPOINT = 768;
+
+function getNavScale(): number {
+  if (typeof window === "undefined") return NAV_SCALE_PC;
+  return window.innerWidth < BREAKPOINT ? NAV_SCALE_SP : NAV_SCALE_PC;
+}
+
 interface CircleBackgroundProps {
   contentThumbnails?: ContentThumbnail[];
 }
@@ -143,33 +153,32 @@ export default function CircleBackground({
   const activeCircleIndex = getActiveCircleIndex();
   const isActive = activeCircleIndex !== null;
 
-  // activeCircleのスケール倍率をアニメーション（1.0 <-> 1.5）
+  // activeCircleのスケール倍率をアニメーション（1.0 <-> NAV_SCALE）
   const activeScaleAnimRef = useRef<number | null>(null);
   const backEventDetailRef = useRef<CustomEvent | null>(null);
   const initialScaleSetRef = useRef(false);
 
-  // 個別ページから直接ロードされた場合、初期値を1.5にセット
+  // 個別ページから直接ロードされた場合、初期値をセット
   useEffect(() => {
     if (isActive && !initialScaleSetRef.current) {
       initialScaleSetRef.current = true;
-      setActiveScaleMultiplier(1.5);
+      setActiveScaleMultiplier(getNavScale());
     }
   }, [isActive]);
 
-  // Forward: navクリック時に1.0→1.5の拡大アニメーションを開始
+  // Forward: navクリック時に1.0→NAV_SCALEの拡大アニメーションを開始
   const startScaleUpAnimation = () => {
-    if (activeScaleAnimRef.current) cancelAnimationFrame(activeScaleAnimRef.current);
+    if (activeScaleAnimRef.current)
+      cancelAnimationFrame(activeScaleAnimRef.current);
     const start = 1.0;
-    const target = 1.5;
+    const target = getNavScale();
     const duration = 600;
     const startTime = performance.now();
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
       const t = Math.min(elapsed / duration, 1);
-      const eased = t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       setActiveScaleMultiplier(start + (target - start) * eased);
       if (t < 1) {
         activeScaleAnimRef.current = requestAnimationFrame(animate);
@@ -179,11 +188,11 @@ export default function CircleBackground({
     activeScaleAnimRef.current = requestAnimationFrame(animate);
   };
 
-  // Back: page-transition-backを受けて1.5→1.0に縮小し、完了後にpage-transition-back-readyを発火
+  // Back: page-transition-backを受けてNAV_SCALE→1.0に縮小し、完了後にpage-transition-back-readyを発火
   useEffect(() => {
     const handleBackScale = (e: Event) => {
       backEventDetailRef.current = e as CustomEvent;
-      const start = 1.5;
+      const start = getNavScale();
       const target = 1.0;
       const duration = 600;
       const startTime = performance.now();
@@ -191,9 +200,7 @@ export default function CircleBackground({
       const animate = (now: number) => {
         const elapsed = now - startTime;
         const t = Math.min(elapsed / duration, 1);
-        const eased = t < 0.5
-          ? 4 * t * t * t
-          : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const current = start + (target - start) * eased;
         setActiveScaleMultiplier(current);
         if (t < 1) {
@@ -216,7 +223,8 @@ export default function CircleBackground({
     window.addEventListener("page-transition-back", handleBackScale);
     return () => {
       window.removeEventListener("page-transition-back", handleBackScale);
-      if (activeScaleAnimRef.current) cancelAnimationFrame(activeScaleAnimRef.current);
+      if (activeScaleAnimRef.current)
+        cancelAnimationFrame(activeScaleAnimRef.current);
     };
   }, []);
 
@@ -578,7 +586,11 @@ export default function CircleBackground({
       return;
     const circle = currentCircles[activeCircleIndex];
     if (!window.__transitionCenters) window.__transitionCenters = {};
-    window.__transitionCenters[pathname] = {x: circle.x, y: circle.y, r: circle.r};
+    window.__transitionCenters[pathname] = {
+      x: circle.x,
+      y: circle.y,
+      r: circle.r,
+    };
   }, [isActive, activeCircleIndex, pathname]);
 
   // page-transition-navigate イベントを受信（詳細ページ遷移時）
@@ -750,265 +762,137 @@ export default function CircleBackground({
 
   return (
     <>
-    <div
-      ref={containerRef}
-      className={styles.container}
-      suppressHydrationWarning
-    >
-      {shouldShowBackground && (
-        <>
-          {/* 単色レイヤー: 円の展開アニメーション中に表示 */}
-          <div
-            className={styles.clipOverlay}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100lvh",
-              backgroundColor: displayBackgroundColor,
-              clipPath: displayCircle ? getClipPath(displayCircle) : "none",
-              zIndex: -1,
-              pointerEvents: "none",
-            }}
-          >
-            {displayCircle && displayCircle.imagePath && !gradientVisible && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: `${displayCircle.x}px`,
-                  top: `${displayCircle.y}px`,
-                  transform: "translate(-50%, -50%)",
-                  width: `${displayCircle.r * 2 * 0.95}px`,
-                  height: `${displayCircle.r * 2 * 0.95}px`,
-                }}
-              >
+      <div
+        ref={containerRef}
+        className={styles.container}
+        suppressHydrationWarning
+      >
+        {shouldShowBackground && (
+          <>
+            {/* 単色レイヤー: 円の展開アニメーション中に表示 */}
+            <div
+              className={styles.clipOverlay}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100lvh",
+                backgroundColor: displayBackgroundColor,
+                clipPath: displayCircle ? getClipPath(displayCircle) : "none",
+                zIndex: -1,
+                pointerEvents: "none",
+              }}
+            >
+              {displayCircle && displayCircle.imagePath && !gradientVisible && (
                 <div
-                  className={
-                    displayCircle.rotationDirection === "clockwise"
-                      ? styles.circleMask
-                      : styles.circleMaskCounterClockwise
-                  }
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    clipPath: "ellipse(50% 50.625% at center)",
-                    overflow: "hidden",
-                    ["--initial-rotation" as string]: `${
-                      displayCircle.initialRotation || 0
-                    }deg`,
+                    position: "absolute",
+                    left: `${displayCircle.x}px`,
+                    top: `${displayCircle.y}px`,
+                    transform: "translate(-50%, -50%)",
+                    width: `${displayCircle.r * 2 * 0.95}px`,
+                    height: `${displayCircle.r * 2 * 0.95}px`,
                   }}
                 >
-                  <Image
-                    src={displayCircle.imagePath}
-                    alt=""
-                    width={displayCircle.r * 2 * 0.95}
-                    height={displayCircle.r * 2 * 0.95}
+                  <div
+                    className={
+                      displayCircle.rotationDirection === "clockwise"
+                        ? styles.circleMask
+                        : styles.circleMaskCounterClockwise
+                    }
                     style={{
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      clipPath: "ellipse(50% 50.625% at center)",
+                      overflow: "hidden",
+                      ["--initial-rotation" as string]: `${
+                        displayCircle.initialRotation || 0
+                      }deg`,
                     }}
-                  />
+                  >
+                    <Image
+                      src={displayCircle.imagePath}
+                      alt=""
+                      width={displayCircle.r * 2 * 0.95}
+                      height={displayCircle.r * 2 * 0.95}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          {/* グラデーションレイヤー: 展開完了後にフェードイン */}
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100lvh",
-              background: `linear-gradient(${displayBackgroundColor}, #ffffff) no-repeat fixed`,
-              opacity: gradientVisible ? 1 : 0,
-              transition: "opacity 0.4s ease-out",
-              zIndex: -1,
-              pointerEvents: "none",
-            }}
-          />
-        </>
-      )}
-
-      {/* ローディングプログレス */}
-      {showLoading && (
-        <div className={styles.loadingOverlay}>
-          <span className={styles.loadingText}>{loadingProgress}%</span>
-        </div>
-      )}
-
-      {circles.map((circle, index) => {
-        const size = circle.r * 2 * 0.95;
-        const initialRotation = circle.initialRotation || 0;
-        const rotationDirection = circle.rotationDirection || "clockwise";
-        const baseScale = circleScales[index] ?? 0;
-        const isScaleTarget = activeCircleIndex === index || clickedNav === index;
-        const scale = isScaleTarget ? baseScale * activeScaleMultiplier : baseScale;
-
-        // will-changeでブラウザに最適化を促しつつ、
-        // アニメーションをtransformのみに限定して描画負荷を下げる
-        const wrapperStyle: React.CSSProperties = {
-          position: "absolute",
-          left: `${circle.x}px`,
-          top: `${circle.y}px`,
-          transform: `translate(-50%, -50%) scale(${scale})`,
-          transformOrigin: "center center",
-          zIndex: -1,
-          willChange: "transform",
-        };
-        const rotationClass =
-          rotationDirection === "clockwise"
-            ? styles.circleMask
-            : styles.circleMaskCounterClockwise;
-
-        // 個別ページ（/works/*など）では円を表示しない
-        const isIndividualPage =
-          (pathname.startsWith("/works/") && pathname !== "/works") ||
-          (pathname.startsWith("/diary/") && pathname !== "/diary");
-        const isHidden =
-          isIndividualPage ||
-          (pathname === "/" && clickedNav !== null && clickedNav !== index) ||
-          (isActive && activeCircleIndex !== index);
-
-        if (circle.isSpecial) {
-          const externalHref = circle.imagePath
-            ? SPECIAL_EXTERNAL_LINKS[circle.imagePath]
-            : null;
-
-          const specialContent = (
-            <div
-              className={rotationClass}
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                clipPath: "ellipse(50% 50.625% at center)",
-                overflow: "hidden",
-                backgroundColor:
-                  gradientVisible || isBackTransition
-                    ? "transparent"
-                    : "var(--purple-background)",
-                cursor:
-                  externalHref && pathname === "/" ? "pointer" : "default",
-                ["--initial-rotation" as string]: `${initialRotation}deg`,
-              }}
-            >
-              {circle.imagePath && (
-                <Image
-                  src={circle.imagePath}
-                  alt=""
-                  width={size}
-                  height={size}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
               )}
             </div>
-          );
-
-          return (
+            {/* グラデーションレイヤー: 展開完了後にフェードイン */}
             <div
-              key={`special-${index}`}
               style={{
-                ...wrapperStyle,
-                opacity: isHidden ? 0 : 1,
-                transition: "opacity 0.2s",
-                pointerEvents: pathname === "/" ? "auto" : "none",
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100lvh",
+                background: `linear-gradient(${displayBackgroundColor}, #ffffff) no-repeat fixed`,
+                opacity: gradientVisible ? 1 : 0,
+                transition: "opacity 0.4s ease-out",
+                zIndex: -1,
+                pointerEvents: "none",
               }}
-              onClick={
-                externalHref
-                  ? () =>
-                      window.open(externalHref, "_blank", "noopener,noreferrer")
-                  : undefined
-              }
-            >
-              {specialContent}
-            </div>
-          );
-        } else if (circle.type === "large") {
-          const href = circle.imagePath
-            ? IMAGE_TO_HREF[circle.imagePath]
-            : null;
-          const backgroundColor = getBackgroundColor(circle.imagePath);
+            />
+          </>
+        )}
 
-          const circleContent = (
-            <div
-              ref={(el) => {
-                if (el) circleElementRefs.current.set(index, el);
-                else circleElementRefs.current.delete(index);
-              }}
-              className={rotationClass}
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                clipPath: "ellipse(50% 50.625% at center)",
-                overflow: "hidden",
-                backgroundColor:
-                  gradientVisible || isBackTransition
-                    ? "transparent"
-                    : backgroundColor,
-                cursor: href && pathname === "/" ? "pointer" : "default",
-                opacity: isHidden ? 0 : 1,
-                transition: "opacity 0.2s",
-                ["--initial-rotation" as string]: `${initialRotation}deg`,
-              }}
-            >
-              <Image
-                src={circle.imagePath || ""}
-                alt=""
-                width={size}
-                height={size}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-          );
+        {/* ローディングプログレス */}
+        {showLoading && (
+          <div className={styles.loadingOverlay}>
+            <span className={styles.loadingText}>{loadingProgress}%</span>
+          </div>
+        )}
 
-          if (href) {
-            return (
-              <div
-                key={`large-${index}`}
-                style={{
-                  ...wrapperStyle,
-                  opacity: isHidden ? 0 : 1,
-                  transition: "opacity 0.2s",
-                  pointerEvents:
-                    pathname === "/" && clickedNav === null ? "auto" : "none",
-                }}
-                onClick={(e) => handleNavClick(e, circle, index)}
-              >
-                {circleContent}
-              </div>
-            );
-          }
+        {circles.map((circle, index) => {
+          const size = circle.r * 2 * 0.95;
+          const initialRotation = circle.initialRotation || 0;
+          const rotationDirection = circle.rotationDirection || "clockwise";
+          const baseScale = circleScales[index] ?? 0;
+          const isScaleTarget =
+            activeCircleIndex === index || clickedNav === index;
+          const scale = isScaleTarget
+            ? baseScale * activeScaleMultiplier
+            : baseScale;
 
-          return (
-            <div key={`large-${index}`} style={wrapperStyle}>
-              {circleContent}
-            </div>
-          );
-        } else {
-          const contentHref = circle.contentHref || null;
+          // will-changeでブラウザに最適化を促しつつ、
+          // アニメーションをtransformのみに限定して描画負荷を下げる
+          const wrapperStyle: React.CSSProperties = {
+            position: "absolute",
+            left: `${circle.x}px`,
+            top: `${circle.y}px`,
+            transform: `translate(-50%, -50%) scale(${scale})`,
+            transformOrigin: "center center",
+            zIndex: -1,
+            willChange: "transform",
+          };
+          const rotationClass =
+            rotationDirection === "clockwise"
+              ? styles.circleMask
+              : styles.circleMaskCounterClockwise;
 
-          return (
-            <div
-              key={`small-${index}`}
-              style={{
-                ...wrapperStyle,
-                opacity: isHidden ? 0 : 1,
-                transition: "opacity 0.2s",
-                cursor: contentHref && pathname === "/" ? "pointer" : "default",
-                pointerEvents: pathname === "/" ? "auto" : "none",
-              }}
-              onClick={contentHref ? () => router.push(contentHref) : undefined}
-            >
+          // 個別ページ（/works/*など）では円を表示しない
+          const isIndividualPage =
+            (pathname.startsWith("/works/") && pathname !== "/works") ||
+            (pathname.startsWith("/diary/") && pathname !== "/diary");
+          const isHidden =
+            isIndividualPage ||
+            (pathname === "/" && clickedNav !== null && clickedNav !== index) ||
+            (isActive && activeCircleIndex !== index);
+
+          if (circle.isSpecial) {
+            const externalHref = circle.imagePath
+              ? SPECIAL_EXTERNAL_LINKS[circle.imagePath]
+              : null;
+
+            const specialContent = (
               <div
                 className={rotationClass}
                 style={{
@@ -1016,6 +900,12 @@ export default function CircleBackground({
                   height: `${size}px`,
                   clipPath: "ellipse(50% 50.625% at center)",
                   overflow: "hidden",
+                  backgroundColor:
+                    gradientVisible || isBackTransition
+                      ? "transparent"
+                      : "var(--purple-background)",
+                  cursor:
+                    externalHref && pathname === "/" ? "pointer" : "default",
                   ["--initial-rotation" as string]: `${initialRotation}deg`,
                 }}
               >
@@ -1033,72 +923,210 @@ export default function CircleBackground({
                   />
                 )}
               </div>
+            );
+
+            return (
+              <div
+                key={`special-${index}`}
+                style={{
+                  ...wrapperStyle,
+                  opacity: isHidden ? 0 : 1,
+                  transition: "opacity 0.2s",
+                  pointerEvents: pathname === "/" ? "auto" : "none",
+                }}
+                onClick={
+                  externalHref
+                    ? () =>
+                        window.open(
+                          externalHref,
+                          "_blank",
+                          "noopener,noreferrer",
+                        )
+                    : undefined
+                }
+              >
+                {specialContent}
+              </div>
+            );
+          } else if (circle.type === "large") {
+            const href = circle.imagePath
+              ? IMAGE_TO_HREF[circle.imagePath]
+              : null;
+            const backgroundColor = getBackgroundColor(circle.imagePath);
+
+            const circleContent = (
+              <div
+                ref={(el) => {
+                  if (el) circleElementRefs.current.set(index, el);
+                  else circleElementRefs.current.delete(index);
+                }}
+                className={rotationClass}
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  clipPath: "ellipse(50% 50.625% at center)",
+                  overflow: "hidden",
+                  backgroundColor:
+                    gradientVisible || isBackTransition
+                      ? "transparent"
+                      : backgroundColor,
+                  cursor: href && pathname === "/" ? "pointer" : "default",
+                  opacity: isHidden ? 0 : 1,
+                  transition: "opacity 0.2s",
+                  ["--initial-rotation" as string]: `${initialRotation}deg`,
+                }}
+              >
+                <Image
+                  src={circle.imagePath || ""}
+                  alt=""
+                  width={size}
+                  height={size}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+            );
+
+            if (href) {
+              return (
+                <div
+                  key={`large-${index}`}
+                  style={{
+                    ...wrapperStyle,
+                    opacity: isHidden ? 0 : 1,
+                    transition: "opacity 0.2s",
+                    pointerEvents:
+                      pathname === "/" && clickedNav === null ? "auto" : "none",
+                  }}
+                  onClick={(e) => handleNavClick(e, circle, index)}
+                >
+                  {circleContent}
+                </div>
+              );
+            }
+
+            return (
+              <div key={`large-${index}`} style={wrapperStyle}>
+                {circleContent}
+              </div>
+            );
+          } else {
+            const contentHref = circle.contentHref || null;
+
+            return (
+              <div
+                key={`small-${index}`}
+                style={{
+                  ...wrapperStyle,
+                  opacity: isHidden ? 0 : 1,
+                  transition: "opacity 0.2s",
+                  cursor:
+                    contentHref && pathname === "/" ? "pointer" : "default",
+                  pointerEvents: pathname === "/" ? "auto" : "none",
+                }}
+                onClick={
+                  contentHref ? () => router.push(contentHref) : undefined
+                }
+              >
+                <div
+                  className={rotationClass}
+                  style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    clipPath: "ellipse(50% 50.625% at center)",
+                    overflow: "hidden",
+                    ["--initial-rotation" as string]: `${initialRotation}deg`,
+                  }}
+                >
+                  {circle.imagePath && (
+                    <Image
+                      src={circle.imagePath}
+                      alt=""
+                      width={size}
+                      height={size}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          }
+        })}
+      </div>
+
+      {/* back遷移中、clickedNavの円をoverlay(zIndex:10)より上に浮遊描画 */}
+      {isBackTransition &&
+        clickedNav !== null &&
+        circles[clickedNav] &&
+        (() => {
+          const circle = circles[clickedNav];
+          const size = circle.r * 2 * 0.95;
+          const rotationClass =
+            (circle.rotationDirection || "clockwise") === "clockwise"
+              ? styles.circleMask
+              : styles.circleMaskCounterClockwise;
+          // 元のDOM要素から現在のtransform matrixを読み取り、回転角を抽出
+          const origEl = circleElementRefs.current.get(clickedNav);
+          let currentDeg = circle.initialRotation || 0;
+          if (origEl) {
+            const cs = getComputedStyle(origEl);
+            const m = cs.transform;
+            if (m && m !== "none") {
+              // matrix(a, b, c, d, tx, ty) → angle = atan2(b, a)
+              const vals = m
+                .match(/matrix\((.+)\)/)?.[1]
+                .split(",")
+                .map(Number);
+              if (vals && vals.length >= 2) {
+                currentDeg = Math.atan2(vals[1], vals[0]) * (180 / Math.PI);
+              }
+            }
+          }
+          return (
+            <div
+              style={{
+                position: "fixed",
+                left: `${circle.x}px`,
+                top: `${circle.y}px`,
+                transform: "translate(-50%, -50%)",
+                zIndex: 11,
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                className={rotationClass}
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  clipPath: "ellipse(50% 50.625% at center)",
+                  overflow: "hidden",
+                  backgroundColor: "transparent",
+                  transformOrigin: "center center",
+                  ["--initial-rotation" as string]: `${currentDeg}deg`,
+                }}
+              >
+                <Image
+                  src={circle.imagePath || ""}
+                  alt=""
+                  width={size}
+                  height={size}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
             </div>
           );
-        }
-      })}
-    </div>
-
-    {/* back遷移中、clickedNavの円をoverlay(zIndex:10)より上に浮遊描画 */}
-    {isBackTransition && clickedNav !== null && circles[clickedNav] && (() => {
-      const circle = circles[clickedNav];
-      const size = circle.r * 2 * 0.95;
-      const rotationClass =
-        (circle.rotationDirection || "clockwise") === "clockwise"
-          ? styles.circleMask
-          : styles.circleMaskCounterClockwise;
-      // 元のDOM要素から現在のtransform matrixを読み取り、回転角を抽出
-      const origEl = circleElementRefs.current.get(clickedNav);
-      let currentDeg = circle.initialRotation || 0;
-      if (origEl) {
-        const cs = getComputedStyle(origEl);
-        const m = cs.transform;
-        if (m && m !== "none") {
-          // matrix(a, b, c, d, tx, ty) → angle = atan2(b, a)
-          const vals = m.match(/matrix\((.+)\)/)?.[1].split(",").map(Number);
-          if (vals && vals.length >= 2) {
-            currentDeg = Math.atan2(vals[1], vals[0]) * (180 / Math.PI);
-          }
-        }
-      }
-      return (
-        <div
-          style={{
-            position: "fixed",
-            left: `${circle.x}px`,
-            top: `${circle.y}px`,
-            transform: "translate(-50%, -50%)",
-            zIndex: 11,
-            pointerEvents: "none",
-          }}
-        >
-          <div
-            className={rotationClass}
-            style={{
-              width: `${size}px`,
-              height: `${size}px`,
-              clipPath: "ellipse(50% 50.625% at center)",
-              overflow: "hidden",
-              backgroundColor: "transparent",
-              transformOrigin: "center center",
-              ["--initial-rotation" as string]: `${currentDeg}deg`,
-            }}
-          >
-            <Image
-              src={circle.imagePath || ""}
-              alt=""
-              width={size}
-              height={size}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-        </div>
-      );
-    })()}
+        })()}
     </>
   );
 }

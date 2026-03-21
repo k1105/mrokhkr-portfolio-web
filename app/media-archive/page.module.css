@@ -7,8 +7,8 @@
 .content {
   width: calc(var(--grid-cell) * 8);
   margin: 0 auto;
-  padding-top: calc(var(--grid-cell) * 3);
-  padding-bottom: 20px;
+  padding-top: calc(var(--grid-cell) * 2.75);
+  padding-bottom: calc(var(--grid-cell) * 2);
   display: flex;
   flex-direction: column;
   gap: 48px;
@@ -37,7 +37,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: calc(var(--grid-cell) * 0.5);
 }
 
 .imageItem {
@@ -65,7 +65,8 @@
 .textContent {
   width: 100%;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  line-height: 1.5;
   flex-direction: column;
 }
 

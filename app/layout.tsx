@@ -16,6 +16,7 @@ import {getWorks, getDiaries} from "../lib/notion";
 
 const inter = Inter({
   variable: "--font-inter",
+  weight: "300",
   subsets: ["latin"],
 });
 

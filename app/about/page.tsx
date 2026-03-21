@@ -95,6 +95,12 @@ export default async function About() {
                   {renderRichText(block.rich_text)}
                 </p>
               );
+            } else if (block.type === "list_item") {
+              return (
+                <p className={`global-text-md ${styles.listItem}`} key={index}>
+                  {renderRichText(block.rich_text)}
+                </p>
+              );
             } else if (block.type === "image") {
               return (
                 <div key={index} className={styles.contentImageWrapper}>

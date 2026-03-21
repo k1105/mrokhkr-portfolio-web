@@ -8,7 +8,7 @@
 .content {
   width: calc(var(--grid-cell) * 8);
   margin: 0 auto;
-  padding-top: calc(var(--grid-cell) * 3);
+  padding-top: calc(var(--grid-cell) * 2.75);
   padding-bottom: 20px;
   display: flex;
   flex-direction: column;
@@ -21,7 +21,7 @@
 .contentWrapper {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: calc(var(--grid-cell) * 0.4);
 }
 
 @keyframes fadeIn {
@@ -81,7 +81,7 @@
 
 .contentImageWrapper {
   width: 100%;
-  margin-bottom: 2rem;
+  margin-bottom: calc(var(--grid-cell) * 0.4);
   display: flex;
   flex-direction: column;
   gap: 8px;
