@@ -119,7 +119,8 @@ export default function CircleBackground({
   const router = useRouter();
   const [circles, setCircles] = useState<Circle[]>([]);
   const [mounted, setMounted] = useState(false);
-  const [circleScales, setCircleScales] = useState<number[]>([]);
+  const circleScalesRef = useRef<number[]>([]);
+  const circleWrapperRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [clickedNav, setClickedNav] = useState<number | null>(null);
   const [clipProgress, setClipProgress] = useState(0);
   const [gradientVisible, setGradientVisible] = useState(false);
@@ -381,10 +382,10 @@ export default function CircleBackground({
       const shouldSkipAnimation = pathname !== "/";
 
       if (animationCompletedRef.current || shouldSkipAnimation) {
-        setCircleScales(new Array(newCircles.length).fill(1.0));
+        circleScalesRef.current = new Array(newCircles.length).fill(1.0);
         animationCompletedRef.current = true;
       } else {
-        setCircleScales(new Array(newCircles.length).fill(0));
+        circleScalesRef.current = new Array(newCircles.length).fill(0);
       }
 
       setMounted(true);
@@ -435,7 +436,7 @@ export default function CircleBackground({
     }
   }, [mounted, circles, pathname]);
 
-  // ★修正: 粘性と生命感のある登場アニメーション
+  // ★修正: 粘性と生命感のある登場アニメーション（DOM直接操作でリレンダリング回避）
   useEffect(() => {
     if (
       !mounted ||
@@ -444,7 +445,7 @@ export default function CircleBackground({
       animationCompletedRef.current
     ) {
       if (animationCompletedRef.current && circles.length > 0) {
-        setCircleScales(new Array(circles.length).fill(1.0));
+        circleScalesRef.current = new Array(circles.length).fill(1.0);
       }
       return;
     }
@@ -455,6 +456,18 @@ export default function CircleBackground({
 
       // tが1になる直前で膨らみ、最後に戻る
       return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    };
+
+    const updateWrapperTransforms = (scales: number[]) => {
+      const wrappers = circleWrapperRefs.current;
+      for (let i = 0; i < scales.length; i++) {
+        const el = wrappers.get(i);
+        if (!el) continue;
+        const circle = circles[i];
+        el.style.transform = `translate(-50%, -50%) scale(${scales[i]})`;
+        el.style.left = `${circle.x}px`;
+        el.style.top = `${circle.y}px`;
+      }
     };
 
     const animate = (currentTime: number) => {
@@ -480,12 +493,13 @@ export default function CircleBackground({
         return viscousPop(t);
       });
 
-      setCircleScales(newScales);
+      circleScalesRef.current = newScales;
+      updateWrapperTransforms(newScales);
 
       if (!allFinished) {
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
-        setCircleScales(new Array(circles.length).fill(1.0));
+        circleScalesRef.current = new Array(circles.length).fill(1.0);
         animationCompletedRef.current = true;
       }
     };
@@ -826,7 +840,11 @@ export default function CircleBackground({
           const size = circle.r * 2 * 0.95;
           const initialRotation = circle.initialRotation || 0;
           const rotationDirection = circle.rotationDirection || "clockwise";
-          const baseScale = circleScales[index] ?? 0;
+          const baseScale = circleScalesRef.current[index] ?? 0;
+          const setWrapperRef = (el: HTMLDivElement | null) => {
+            if (el) circleWrapperRefs.current.set(index, el);
+            else circleWrapperRefs.current.delete(index);
+          };
           const isScaleTarget =
             activeCircleIndex === index || clickedNav === index;
           const scale = isScaleTarget
@@ -898,6 +916,7 @@ export default function CircleBackground({
 
             return (
               <div
+                ref={setWrapperRef}
                 key={`special-${index}`}
                 style={{
                   ...wrapperStyle,
@@ -964,6 +983,7 @@ export default function CircleBackground({
             if (href) {
               return (
                 <div
+                  ref={setWrapperRef}
                   key={`large-${index}`}
                   style={{
                     ...wrapperStyle,
@@ -980,7 +1000,7 @@ export default function CircleBackground({
             }
 
             return (
-              <div key={`large-${index}`} style={wrapperStyle}>
+              <div ref={setWrapperRef} key={`large-${index}`} style={wrapperStyle}>
                 {circleContent}
               </div>
             );
@@ -989,6 +1009,7 @@ export default function CircleBackground({
 
             return (
               <div
+                ref={setWrapperRef}
                 key={`small-${index}`}
                 style={{
                   ...wrapperStyle,
