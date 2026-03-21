@@ -188,43 +188,18 @@ export default function CircleBackground({
     activeScaleAnimRef.current = requestAnimationFrame(animate);
   };
 
-  // Back: page-transition-backを受けてNAV_SCALE→1.0に縮小し、完了後にpage-transition-back-readyを発火
+  // Back: page-transition-backを受けて即座にpage-transition-back-readyを発火（スケール縮小はhandleBackStartで行う）
   useEffect(() => {
     const handleBackScale = (e: Event) => {
-      backEventDetailRef.current = e as CustomEvent;
-      const start = getNavScale();
-      const target = 1.0;
-      const duration = 600;
-      const startTime = performance.now();
-
-      const animate = (now: number) => {
-        const elapsed = now - startTime;
-        const t = Math.min(elapsed / duration, 1);
-        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        const current = start + (target - start) * eased;
-        setActiveScaleMultiplier(current);
-        if (t < 1) {
-          activeScaleAnimRef.current = requestAnimationFrame(animate);
-        } else {
-          // 縮小完了 → 従来のback処理を開始
-          const detail = backEventDetailRef.current
-            ? (backEventDetailRef.current as CustomEvent).detail
-            : {};
-          window.dispatchEvent(
-            new CustomEvent("page-transition-back-ready", {detail}),
-          );
-          backEventDetailRef.current = null;
-        }
-      };
-
-      activeScaleAnimRef.current = requestAnimationFrame(animate);
+      const detail = (e as CustomEvent).detail || {};
+      window.dispatchEvent(
+        new CustomEvent("page-transition-back-ready", {detail}),
+      );
     };
 
     window.addEventListener("page-transition-back", handleBackScale);
     return () => {
       window.removeEventListener("page-transition-back", handleBackScale);
-      if (activeScaleAnimRef.current)
-        cancelAnimationFrame(activeScaleAnimRef.current);
     };
   }, []);
 
@@ -626,6 +601,24 @@ export default function CircleBackground({
         isBackTransitionRef.current = true;
         setClickedNav(idx);
         setIsBackTransition(true);
+        // NAV_SCALE→1.0の縮小アニメーションを開始（円が表示された状態で）
+        setActiveScaleMultiplier(getNavScale());
+        const start = getNavScale();
+        const target = 1.0;
+        const duration = 600;
+        const startTime = performance.now();
+
+        const animate = (now: number) => {
+          const elapsed = now - startTime;
+          const t = Math.min(elapsed / duration, 1);
+          const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          setActiveScaleMultiplier(start + (target - start) * eased);
+          if (t < 1) {
+            activeScaleAnimRef.current = requestAnimationFrame(animate);
+          }
+        };
+
+        activeScaleAnimRef.current = requestAnimationFrame(animate);
       }
     };
     const handleBackComplete = () => {
@@ -1091,7 +1084,8 @@ export default function CircleBackground({
                 position: "fixed",
                 left: `${circle.x}px`,
                 top: `${circle.y}px`,
-                transform: "translate(-50%, -50%)",
+                transform: `translate(-50%, -50%) scale(${activeScaleMultiplier})`,
+                transformOrigin: "center center",
                 zIndex: 11,
                 pointerEvents: "none",
               }}
