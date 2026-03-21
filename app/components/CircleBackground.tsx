@@ -735,18 +735,14 @@ export default function CircleBackground({
     if (!circle || typeof window === "undefined") return "none";
     const size = circle.r * 2 * 0.95;
     const radiusX = size / 2;
-    const radiusY = radiusX * (81 / 80); // 80:81の比率
-    const startRadiusX = radiusX;
-    const startRadiusY = radiusY;
+    const startRadius = radiusX;
     const maxRadius = Math.sqrt(
       window.innerWidth ** 2 + window.innerHeight ** 2,
     );
-    const currentRadiusX =
-      startRadiusX + (maxRadius - startRadiusX) * clipProgress;
-    const currentRadiusY =
-      startRadiusY + (maxRadius * (81 / 80) - startRadiusY) * clipProgress;
+    const currentRadius =
+      startRadius + (maxRadius - startRadius) * clipProgress;
 
-    return `ellipse(${currentRadiusX}px ${currentRadiusY}px at ${circle.x}px ${circle.y}px)`;
+    return `circle(${currentRadius}px at ${circle.x}px ${circle.y}px)`;
   };
 
   const activeCircle = isActive ? circles[activeCircleIndex] : null;
@@ -804,7 +800,7 @@ export default function CircleBackground({
                     style={{
                       width: "100%",
                       height: "100%",
-                      clipPath: "ellipse(50% 50.625% at center)",
+                      clipPath: "circle(50% at center)",
                       overflow: "hidden",
                       ["--initial-rotation" as string]: `${
                         displayCircle.initialRotation || 0
@@ -898,7 +894,7 @@ export default function CircleBackground({
                 style={{
                   width: `${size}px`,
                   height: `${size}px`,
-                  clipPath: "ellipse(50% 50.625% at center)",
+                  clipPath: "circle(50% at center)",
                   overflow: "hidden",
                   backgroundColor:
                     gradientVisible || isBackTransition
@@ -964,7 +960,7 @@ export default function CircleBackground({
                 style={{
                   width: `${size}px`,
                   height: `${size}px`,
-                  clipPath: "ellipse(50% 50.625% at center)",
+                  clipPath: "circle(50% at center)",
                   overflow: "hidden",
                   backgroundColor:
                     gradientVisible || isBackTransition
@@ -1036,7 +1032,7 @@ export default function CircleBackground({
                   style={{
                     width: `${size}px`,
                     height: `${size}px`,
-                    clipPath: "ellipse(50% 50.625% at center)",
+                    clipPath: "circle(50% at center)",
                     overflow: "hidden",
                     ["--initial-rotation" as string]: `${initialRotation}deg`,
                   }}
@@ -1105,7 +1101,7 @@ export default function CircleBackground({
                 style={{
                   width: `${size}px`,
                   height: `${size}px`,
-                  clipPath: "ellipse(50% 50.625% at center)",
+                  clipPath: "circle(50% at center)",
                   overflow: "hidden",
                   backgroundColor: "transparent",
                   transformOrigin: "center center",
