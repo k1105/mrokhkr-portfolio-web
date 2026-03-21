@@ -265,8 +265,8 @@ export default function PageTransitionOverlay() {
     const animate = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // ease-in: slow start, fast end
-      const eased = progress * progress;
+      // ease-out: fast start, slow end
+      const eased = 1 - (1 - progress) * (1 - progress);
       const radius = maxRadius + (minRadius - maxRadius) * eased;
 
       el.style.clipPath = `circle(${radius}px at ${cx}px ${cy}px)`;

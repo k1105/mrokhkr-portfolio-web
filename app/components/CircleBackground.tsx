@@ -99,7 +99,7 @@ const getBackgroundColor = (imagePath: string | undefined): string => {
 };
 
 // ナビゲーションクリック時の拡大倍率（SP / PC）
-const NAV_SCALE_SP = 2.5;
+const NAV_SCALE_SP = 2;
 const NAV_SCALE_PC = 1.5;
 const BREAKPOINT = 768;
 
@@ -128,7 +128,10 @@ export default function CircleBackground({
   const [imagesReady, setImagesReady] = useState(false);
   const [isBackTransition, setIsBackTransition] = useState(false);
   const [activeScaleMultiplier, _setASM] = useState(1);
-  const setActiveScaleMultiplier = (v: number) => { console.trace("[scale]", v); _setASM(v); };
+  const setActiveScaleMultiplier = (v: number) => {
+    console.trace("[scale]", v);
+    _setASM(v);
+  };
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -187,7 +190,6 @@ export default function CircleBackground({
 
     activeScaleAnimRef.current = requestAnimationFrame(animate);
   };
-
 
   // 円の生成（初期化）
   useEffect(() => {
@@ -608,7 +610,8 @@ export default function CircleBackground({
         const animate = (now: number) => {
           const elapsed = now - startTime;
           const t = Math.min(elapsed / duration, 1);
-          const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          // ease-out: fast start, slow end
+          const eased = 1 - (1 - t) * (1 - t);
           setActiveScaleMultiplier(start + (target - start) * eased);
           if (t < 1) {
             activeScaleAnimRef.current = requestAnimationFrame(animate);
@@ -1003,7 +1006,11 @@ export default function CircleBackground({
             }
 
             return (
-              <div ref={setWrapperRef} key={`large-${index}`} style={wrapperStyle}>
+              <div
+                ref={setWrapperRef}
+                key={`large-${index}`}
+                style={wrapperStyle}
+              >
                 {circleContent}
               </div>
             );
