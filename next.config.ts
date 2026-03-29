@@ -3,24 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.notion-static.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.notion.so",
-      },
-      {
-        protocol: "https",
-        hostname: "s3.us-west-2.amazonaws.com",
-      },
-    ],
+    unoptimized: true,
   },
 };
 

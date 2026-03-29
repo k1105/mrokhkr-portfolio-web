@@ -111,7 +111,7 @@ async function fetchAllWorks(): Promise<NotionWork[]> {
     ) {
       const fileObj = thumbnailProperty.files[0];
       if (fileObj.type === "file") {
-        thumbnailUrl = `/api/notion-image?pageId=${page.id}&property=thumbnail`;
+        thumbnailUrl = `/images/thumbnails/${page.id}.webp`;
       } else if (fileObj.type === "external") {
         thumbnailUrl = fileObj.external.url;
       }
@@ -279,7 +279,7 @@ async function fetchBlockContent(
 
       const imageUrl =
         imageData?.type === "file"
-          ? `/api/notion-image?blockId=${(block as {id: string}).id}`
+          ? `/images/blocks/${(block as {id: string}).id}.webp`
           : imageData?.external?.url;
 
       const caption =
@@ -438,7 +438,7 @@ async function fetchAllMediaArchives(): Promise<NotionMediaArchive[]> {
     ) {
       const fileObj = thumbnailProperty.files[0];
       if (fileObj.type === "file") {
-        thumbnailUrl = `/api/notion-image?pageId=${page.id}&property=thumbnail`;
+        thumbnailUrl = `/images/thumbnails/${page.id}.webp`;
       } else if (fileObj.type === "external") {
         thumbnailUrl = fileObj.external.url;
       }
@@ -518,7 +518,7 @@ async function fetchAllDiaries(): Promise<NotionDiary[]> {
     ) {
       const fileObj = thumbnailProperty.files[0];
       if (fileObj.type === "file") {
-        thumbnailUrl = `/api/notion-image?pageId=${page.id}&property=thumbnail`;
+        thumbnailUrl = `/images/thumbnails/${page.id}.webp`;
       } else if (fileObj.type === "external") {
         thumbnailUrl = fileObj.external.url;
       }

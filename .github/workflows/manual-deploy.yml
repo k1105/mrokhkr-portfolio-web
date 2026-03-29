@@ -1,9 +1,8 @@
 name: Manual Deploy
 on:
   workflow_dispatch:
+
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Vercel Deploy Hook
-        run: curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_5XJRi3hYqKlA6xZDf265UvmqYLnJ/r16Wo3BwgT"
+  build-and-deploy:
+    uses: ./.github/workflows/main.yml
+    secrets: inherit
